@@ -1,9 +1,10 @@
 import { UserButton } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
+
+import { db } from "@/lib/db";
 
 import { StoreSwitcher } from "@/components/store-switcher";
 import { MainNav } from "@/components/main-nav";
-import { db } from "@/lib/db";
-import { currentUser } from "@clerk/nextjs/server";
 
 export async function Navbar() {
   const user = await currentUser();
