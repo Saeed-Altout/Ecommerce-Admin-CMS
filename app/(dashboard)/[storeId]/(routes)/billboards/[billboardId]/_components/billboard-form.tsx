@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Store } from "@/lib/generated/prisma/client";
+import { Billboard } from "@/lib/generated/prisma/client";
 import { useOrigin } from "@/hooks/use-origin";
 
 import {
@@ -29,12 +29,15 @@ import { AlertModal } from "@/components/modals/alert-modal";
 import { ApiAlert } from "@/components/ui/alert-api";
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
+  label: z.string().min(2, {
+    message: "Label must be at least 2 characters.",
+  }),
+  imageUrl: z.url({
+    message: "Image URL must be a valid URL.",
   }),
 });
 
-export function SettingsForm({ initialData }: { initialData: Store }) {
+export function BillboardForm({ initialData }: { initialData: Billboard }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -42,10 +45,18 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
   const params = useParams();
   const origin = useOrigin();
 
+  const title = initialData ? "Edit billboard" : "Create billboard";
+  const description = initialData ? "Edit billboard" : "Add a new billboard";
+  const toastMessage = initialData
+    ? "Billboard updated successfully"
+    : "Billboard created successfully";
+  const action = initialData ? "Save changes" : "Create";
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData ?? {
-      name: "",
+      label: "",
+      imageUrl: "",
     },
   });
 
@@ -53,8 +64,8 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
     try {
       setLoading(true);
 
-      await axios.patch(`/api/stores/${params.storeId}`, values);
-      toast.success("Store updated successfully");
+      await axios.patch(`/api/billboards/${params.billboardId}`, values);
+      toast.success(toastMessage);
       router.refresh();
     } catch {
       toast.error("Something went wrong!!");
@@ -66,8 +77,8 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
   async function onConfirm() {
     try {
       setLoading(true);
-      await axios.delete(`/api/stores/${params.storeId}`);
-      toast.success("Store deleted successfully");
+      await axios.delete(`/api/billboards/${params.billboardId}`);
+      toast.success("Billboard deleted successfully");
       router.refresh();
       router.push("/");
     } catch {
@@ -79,20 +90,24 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
 
   return (
     <>
-      <AlertModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        loading={loading}
-        onConfirm={onConfirm}
-      />
-      <Heading title="Settings" description="Manage store preferences">
-        <Button
-          variant="destructive"
-          size="icon"
-          onClick={() => setIsOpen(true)}
-        >
-          <TrashIcon />
-        </Button>
+      {initialData && (
+        <AlertModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          loading={loading}
+          onConfirm={onConfirm}
+        />
+      )}
+      <Heading title={title} description={description}>
+        {initialData && (
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => setIsOpen(true)}
+          >
+            <TrashIcon />
+          </Button>
+        )}
       </Heading>
       <Separator />
       <Form {...form}>
@@ -100,16 +115,12 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <FormField
               control={form.control}
-              name="name"
+              name="label"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Store name</FormLabel>
+                  <FormLabel>Label</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="store name"
-                      disabled={loading}
-                      {...field}
-                    />
+                    <Input placeholder="label" disabled={loading} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -118,19 +129,19 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
           </div>
           <div className="flex items-center gap-x-2">
             <Button type="submit" disabled={loading}>
-              Save changes {loading && <Spinner />}
+              {action} {loading && <Spinner />}
             </Button>
           </div>
         </form>
       </Form>
       <ApiAlert
         title="NEXT_PUBLIC_API_URL"
-        description={`${origin}/api/stores/${params.storeId}`}
+        description={`${origin}/api/billboards/${params.billboardId}`}
         variant="public"
       />
       <ApiAlert
         title="NEXT_PUBLIC_ADMIN_API_URL"
-        description={`${origin}/api/stores/${params.storeId}`}
+        description={`${origin}/api/billboards/${params.billboardId}`}
         variant="admin"
       />
     </>

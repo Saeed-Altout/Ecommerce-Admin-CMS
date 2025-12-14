@@ -18,7 +18,7 @@ export function AlertModal({
   return (
     <Modal
       title="Are you sure?"
-      description="Are you sure you want to delete this store?"
+      description="This action cannot be undone."
       isOpen={isOpen}
       onClose={onClose}
     >

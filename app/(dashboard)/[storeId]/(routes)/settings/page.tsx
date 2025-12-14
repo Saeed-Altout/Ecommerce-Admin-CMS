@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 import { db } from "@/lib/db";
-import SettingsForm from "./_components/settings-form";
+
+import { SettingsForm } from "./_components/settings-form";
 
 export default async function SettingsPage({
   params,
