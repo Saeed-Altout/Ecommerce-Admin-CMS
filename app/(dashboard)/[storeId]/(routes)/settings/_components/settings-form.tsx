@@ -10,6 +10,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Store } from "@/lib/generated/prisma/client";
+import { useOrigin } from "@/hooks/use-origin";
 
 import {
   Form,
@@ -24,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
+import { ApiAlert } from "@/components/ui/alert-api";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -37,6 +39,7 @@ export default function SettingsForm({ initialData }: { initialData: Store }) {
 
   const router = useRouter();
   const params = useParams();
+  const origin = useOrigin();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -119,6 +122,16 @@ export default function SettingsForm({ initialData }: { initialData: Store }) {
           </div>
         </form>
       </Form>
+      <ApiAlert
+        title="NEXT_PUBLIC_API_URL"
+        description={`${origin}/api/stores/${params.storeId}`}
+        variant="public"
+      />
+      <ApiAlert
+        title="NEXT_PUBLIC_ADMIN_API_URL"
+        description={`${origin}/api/stores/${params.storeId}`}
+        variant="admin"
+      />
     </>
   );
 }
