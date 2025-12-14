@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
+import { Navbar } from "@/components/navbar";
 
 export default async function StoreLayout({
   children,
@@ -32,5 +33,10 @@ export default async function StoreLayout({
     redirect("/");
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
 }
