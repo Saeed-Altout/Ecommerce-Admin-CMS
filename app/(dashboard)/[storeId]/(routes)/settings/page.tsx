@@ -2,24 +2,18 @@ import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs/server";
 
 import { db } from "@/lib/db";
-import { Navbar } from "@/components/navbar";
+import SettingsForm from "./_components/settings-form";
 
-export default async function StoreLayout({
-  children,
+export default async function SettingsPage({
   params,
-}: Readonly<{
-  children: React.ReactNode;
+}: {
   params: Promise<{ storeId: string }>;
-}>) {
+}) {
   const storeId = (await params).storeId;
   const user = await currentUser();
 
   if (!user?.id) {
     redirect("/sign-in");
-  }
-
-  if (!storeId) {
-    redirect("/");
   }
 
   const store = await db.store.findFirst({
@@ -33,12 +27,5 @@ export default async function StoreLayout({
     redirect("/");
   }
 
-  return (
-    <>
-      <Navbar />
-      <main className="flex-col">
-        <div className="flex-1 space-y-4 p-4 pt-4">{children}</div>
-      </main>
-    </>
-  );
+  return <SettingsForm initialData={store} />;
 }
