@@ -1,5 +1,4 @@
-
-"use client"
+"use client";
 
 import { useStoreModal } from "@/hooks/use-store-modal";
 import { useEffect } from "react";
@@ -13,9 +12,5 @@ export default function RootPage() {
     }
   }, [storeModal]);
 
-  return (
-    <main className="p-4">
-      This page is protected by Clerk
-    </main>
-  );
+  return <main className="p-4">This page is protected by Clerk</main>;
 }
