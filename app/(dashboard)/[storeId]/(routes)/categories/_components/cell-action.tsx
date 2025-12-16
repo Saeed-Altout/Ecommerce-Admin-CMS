@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { EditIcon, MoreHorizontal, CopyIcon, TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
-import { BillboardColumn } from "./columns";
+import { CategoryColumn } from "./columns";
 
 import {
   DropdownMenu,
@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { AlertModal } from "@/components/modals/alert-modal";
 
-export function CellAction({ data }: { data: BillboardColumn }) {
+export function CellAction({ data }: { data: CategoryColumn }) {
   const router = useRouter();
   const params = useParams();
 
@@ -27,26 +27,27 @@ export function CellAction({ data }: { data: BillboardColumn }) {
 
   function onCopy(id: string) {
     if (!id) {
-      toast.error("Billboard ID not found");
+      toast.error("Category ID not found");
       return;
     }
     navigator.clipboard.writeText(id);
-    toast.success("Billboard ID copied to clipboard");
+    toast.success("Category ID copied to clipboard");
   }
 
   async function onConfirm() {
     try {
       setIsDeleting(true);
-      await axios.delete(`/api/${params.storeId}/billboards/${data.id}`);
-      toast.success("Billboard deleted successfully");
+      await axios.delete(`/api/${params.storeId}/categories/${data.id}`);
+      toast.success("Category deleted successfully");
       setIsOpen(false);
       router.refresh();
     } catch {
-      toast.error("Make sure you removed all categories using this billboard");
+      toast.error("Make sure you removed all categories using this Category");
     } finally {
       setIsDeleting(false);
     }
   }
+
   return (
     <>
       <AlertModal
@@ -66,7 +67,7 @@ export function CellAction({ data }: { data: BillboardColumn }) {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             onClick={() =>
-              router.push(`/${params.storeId}/billboards/${data.id}`)
+              router.push(`/${params.storeId}/categories/${data.id}`)
             }
           >
             <EditIcon className="size-4" />

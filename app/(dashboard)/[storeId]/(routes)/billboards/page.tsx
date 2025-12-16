@@ -1,5 +1,9 @@
-import { BillboardsClient } from "./_components/client";
+import { format } from "date-fns";
+
 import { db } from "@/lib/db";
+
+import { BillboardsClient } from "./_components/client";
+import { BillboardColumn } from "./_components/columns";
 
 export default async function BillboardsPage({
   params,
@@ -16,5 +20,13 @@ export default async function BillboardsPage({
     },
   });
 
-  return <BillboardsClient data={billboards} />;
+  const formattedBillboards: BillboardColumn[] = billboards.map(
+    (billboard) => ({
+      id: billboard.id,
+      label: billboard.label,
+      createdAt: format(billboard.createdAt, "PPP"),
+    }),
+  );
+
+  return <BillboardsClient data={formattedBillboards} />;
 }

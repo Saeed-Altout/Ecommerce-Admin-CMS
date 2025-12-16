@@ -8,30 +8,30 @@ import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { ApiList } from "@/components/ui/api-list";
 
-import { BillboardColumn, columns } from "./columns";
+import { CategoryColumn, columns } from "./columns";
 
-export function BillboardsClient({ data }: { data: BillboardColumn[] }) {
+export function CategoriesClient({ data }: { data: CategoryColumn[] }) {
   const params = useParams();
   const router = useRouter();
 
   return (
     <>
       <Heading
-        title={`Billboards (${data.length})`}
-        description="Manage your billboards"
+        title={`Categories (${data.length})`}
+        description="Manage your categories"
       >
         <Button
-          onClick={() => router.push(`/${params.storeId}/billboards/new`)}
+          onClick={() => router.push(`/${params.storeId}/categories/new`)}
         >
           <PlusIcon className="size-4" />
           Add New
         </Button>
       </Heading>
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="label" />
-      <Heading title="API" description="Apis calls for Billboards" />
+      <DataTable columns={columns} data={data} searchKey="name" />
+      <Heading title="API" description="Apis calls for Categories" />
       <Separator />
-      <ApiList entityName="billboards" entityIdName="billboardId" />
+      <ApiList entityName="categories" entityIdName="categoryId" />
     </>
   );
 }
