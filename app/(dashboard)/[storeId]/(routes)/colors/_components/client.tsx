@@ -8,25 +8,28 @@ import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { ApiList } from "@/components/ui/api-list";
 
-import { SizeColumn, columns } from "./columns";
+import { ColorColumn, columns } from "./columns";
 
-export function SizesClient({ data }: { data: SizeColumn[] }) {
+export function ColorsClient({ data }: { data: ColorColumn[] }) {
   const params = useParams();
   const router = useRouter();
 
   return (
     <>
-      <Heading title={`Sizes (${data.length})`} description="Manage your sizes">
-        <Button onClick={() => router.push(`/${params.storeId}/sizes/new`)}>
+      <Heading
+        title={`Colors (${data.length})`}
+        description="Manage your colors"
+      >
+        <Button onClick={() => router.push(`/${params.storeId}/colors/new`)}>
           <PlusIcon className="size-4" />
           Add New
         </Button>
       </Heading>
       <Separator />
       <DataTable columns={columns} data={data} searchKey="name" />
-      <Heading title="API" description="Apis calls for Sizes" />
+      <Heading title="API" description="Apis calls for Colors" />
       <Separator />
-      <ApiList entityName="sizes" entityIdName="sizeId" />
+      <ApiList entityName="colors" entityIdName="colorId" />
     </>
   );
 }

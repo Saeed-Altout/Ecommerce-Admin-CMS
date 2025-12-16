@@ -67,15 +67,10 @@ export function CategoryForm({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData
-      ? {
-          name: initialData.name,
-          billboardId: initialData.billboardId,
-        }
-      : {
-          name: "",
-          billboardId: "",
-        },
+    defaultValues: initialData ?? {
+      name: "",
+      billboardId: "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {

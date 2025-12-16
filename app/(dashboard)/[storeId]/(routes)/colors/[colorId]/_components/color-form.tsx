@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Size } from "@/lib/generated/prisma/client";
+import { Color } from "@/lib/generated/prisma/client";
 
 import {
   Form,
@@ -30,12 +30,10 @@ const formSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
-  value: z.string().min(2, {
-    message: "Value must be at least 2 characters.",
-  }),
+  value: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
 });
 
-export function SizeForm({ initialData }: { initialData: Size | null }) {
+export function ColorForm({ initialData }: { initialData: Color | null }) {
   const [loading, setLoading] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -43,11 +41,11 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
   const router = useRouter();
   const params = useParams();
 
-  const title = initialData ? "Edit size" : "Create size";
-  const description = initialData ? "Edit size" : "Add a new size";
+  const title = initialData ? "Edit color" : "Create color";
+  const description = initialData ? "Edit color" : "Add a new color";
   const toastMessage = initialData
-    ? "Size updated successfully"
-    : "Size created successfully";
+    ? "Color updated successfully"
+    : "Color created successfully";
   const action = initialData ? "Save changes" : "Create";
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -64,15 +62,15 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
 
       if (initialData) {
         await axios.patch(
-          `/api/${params.storeId}/sizes/${params.sizeId}`,
+          `/api/${params.storeId}/colors/${params.colorId}`,
           values,
         );
       } else {
-        await axios.post(`/api/${params.storeId}/sizes`, values);
+        await axios.post(`/api/${params.storeId}/colors`, values);
       }
 
       toast.success(toastMessage);
-      router.push(`/${params.storeId}/sizes`);
+      router.push(`/${params.storeId}/colors`);
       router.refresh();
     } catch {
       toast.error("Something went wrong!!");
@@ -84,13 +82,13 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
   async function onConfirm() {
     try {
       setIsDeleting(true);
-      await axios.delete(`/api/${params.storeId}/sizes/${params.sizeId}`);
+      await axios.delete(`/api/${params.storeId}/colors/${params.colorId}`);
       toast.success("Size deleted successfully");
       setIsOpen(false);
-      router.push(`/${params.storeId}/sizes`);
+      router.push(`/${params.storeId}/colors`);
       router.refresh();
     } catch {
-      toast.error("Make sure you removed all categories using this size");
+      toast.error("Make sure you removed all categories using this color");
     } finally {
       setIsDeleting(false);
     }
@@ -145,11 +143,17 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
                 <FormItem>
                   <FormLabel>Value</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Size value"
-                      disabled={loading || isDeleting}
-                      {...field}
-                    />
+                    <div className="flex items-center gap-x-2">
+                      <Input
+                        placeholder="Size value"
+                        disabled={loading || isDeleting}
+                        {...field}
+                      />
+                      <span
+                        className="size-8 rounded-full border"
+                        style={{ backgroundColor: field.value }}
+                      />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
