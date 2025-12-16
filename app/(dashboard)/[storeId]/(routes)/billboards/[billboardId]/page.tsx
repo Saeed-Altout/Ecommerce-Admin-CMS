@@ -23,9 +23,5 @@ export default async function BillboardsPage({
     },
   });
 
-  //   if (!billboard) {
-  //     redirect("/");
-  //   }
-
   return <BillboardForm initialData={billboard} />;
 }

@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { Billboard } from "@/lib/generated/prisma/client";
-import { useOrigin } from "@/hooks/use-origin";
 
 import {
   Form,
@@ -26,7 +25,7 @@ import { Heading } from "@/components/ui/heading";
 import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/alert-api";
+import { ImageUpload } from "@/components/ui/image-upload";
 
 const formSchema = z.object({
   label: z.string().min(2, {
@@ -37,13 +36,17 @@ const formSchema = z.object({
   }),
 });
 
-export function BillboardForm({ initialData }: { initialData: Billboard }) {
+export function BillboardForm({
+  initialData,
+}: {
+  initialData: Billboard | null;
+}) {
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
   const params = useParams();
-  const origin = useOrigin();
 
   const title = initialData ? "Edit billboard" : "Create billboard";
   const description = initialData ? "Edit billboard" : "Add a new billboard";
@@ -54,18 +57,32 @@ export function BillboardForm({ initialData }: { initialData: Billboard }) {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData ?? {
-      label: "",
-      imageUrl: "",
-    },
+    defaultValues: initialData
+      ? {
+          label: initialData.label,
+          imageUrl: initialData.image,
+        }
+      : {
+          label: "",
+          imageUrl: "",
+        },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setLoading(true);
 
-      await axios.patch(`/api/billboards/${params.billboardId}`, values);
+      if (initialData) {
+        await axios.patch(
+          `/api/${params.storeId}/billboards/${params.billboardId}`,
+          values,
+        );
+      } else {
+        await axios.post(`/api/${params.storeId}/billboards`, values);
+      }
+
       toast.success(toastMessage);
+      router.push(`/${params.storeId}/billboards`);
       router.refresh();
     } catch {
       toast.error("Something went wrong!!");
@@ -76,15 +93,17 @@ export function BillboardForm({ initialData }: { initialData: Billboard }) {
 
   async function onConfirm() {
     try {
-      setLoading(true);
-      await axios.delete(`/api/billboards/${params.billboardId}`);
+      setIsDeleting(true);
+      await axios.delete(
+        `/api/${params.storeId}/billboards/${params.billboardId}`,
+      );
       toast.success("Billboard deleted successfully");
+      router.push(`/${params.storeId}/billboards`);
       router.refresh();
-      router.push("/");
     } catch {
-      toast.error("Something went wrong!!");
+      toast.error("Make sure you removed all categories using this billboard");
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   }
 
@@ -94,7 +113,7 @@ export function BillboardForm({ initialData }: { initialData: Billboard }) {
         <AlertModal
           isOpen={isOpen}
           onClose={() => setIsOpen(false)}
-          loading={loading}
+          loading={isDeleting}
           onConfirm={onConfirm}
         />
       )}
@@ -112,6 +131,24 @@ export function BillboardForm({ initialData }: { initialData: Billboard }) {
       <Separator />
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="imageUrl"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Background Image</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value ? [field.value] : []}
+                    onChange={(url) => field.onChange(url)}
+                    onRemove={() => field.onChange("")}
+                    disabled={loading || isDeleting}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             <FormField
               control={form.control}
@@ -120,7 +157,11 @@ export function BillboardForm({ initialData }: { initialData: Billboard }) {
                 <FormItem>
                   <FormLabel>Label</FormLabel>
                   <FormControl>
-                    <Input placeholder="label" disabled={loading} {...field} />
+                    <Input
+                      placeholder="Billboard label"
+                      disabled={loading || isDeleting}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -128,22 +169,12 @@ export function BillboardForm({ initialData }: { initialData: Billboard }) {
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || isDeleting}>
               {action} {loading && <Spinner />}
             </Button>
           </div>
         </form>
       </Form>
-      <ApiAlert
-        title="NEXT_PUBLIC_API_URL"
-        description={`${origin}/api/billboards/${params.billboardId}`}
-        variant="public"
-      />
-      <ApiAlert
-        title="NEXT_PUBLIC_ADMIN_API_URL"
-        description={`${origin}/api/billboards/${params.billboardId}`}
-        variant="admin"
-      />
     </>
   );
 }

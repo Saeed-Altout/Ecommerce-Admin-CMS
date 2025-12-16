@@ -36,6 +36,7 @@ const formSchema = z.object({
 
 export function SettingsForm({ initialData }: { initialData: Store }) {
   const [loading, setLoading] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
@@ -65,7 +66,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
 
   async function onConfirm() {
     try {
-      setLoading(true);
+      setIsDeleting(true);
       await axios.delete(`/api/stores/${params.storeId}`);
       toast.success("Store deleted successfully");
       router.refresh();
@@ -73,7 +74,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
     } catch {
       toast.error("Something went wrong!!");
     } finally {
-      setLoading(false);
+      setIsDeleting(false);
     }
   }
 
@@ -82,7 +83,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
       <AlertModal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
-        loading={loading}
+        loading={isDeleting}
         onConfirm={onConfirm}
       />
       <Heading title="Settings" description="Manage store preferences">
@@ -107,7 +108,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
                   <FormControl>
                     <Input
                       placeholder="store name"
-                      disabled={loading}
+                      disabled={loading || isDeleting}
                       {...field}
                     />
                   </FormControl>
@@ -117,7 +118,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || isDeleting}>
               Save changes {loading && <Spinner />}
             </Button>
           </div>
