@@ -27,11 +27,11 @@ export function CellAction({ data }: { data: OrderColumn }) {
 
   function onCopy(id: string) {
     if (!id) {
-      toast.error("Billboard ID not found");
+      toast.error("Order ID not found");
       return;
     }
     navigator.clipboard.writeText(id);
-    toast.success("Billboard ID copied to clipboard");
+    toast.success("Order ID copied to clipboard");
   }
 
   async function onConfirm() {
