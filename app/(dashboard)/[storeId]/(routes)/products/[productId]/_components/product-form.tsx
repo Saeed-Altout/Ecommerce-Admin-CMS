@@ -1,0 +1,387 @@
+"use client";
+import { TrashIcon } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import axios from "axios";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import {
+  Category,
+  Color,
+  Image,
+  Product,
+  Size,
+} from "@/lib/generated/prisma/client";
+
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectGroup,
+  SelectLabel,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Heading } from "@/components/ui/heading";
+import { Spinner } from "@/components/ui/spinner";
+import { Separator } from "@/components/ui/separator";
+import { AlertModal } from "@/components/modals/alert-modal";
+import { ImageUpload } from "@/components/ui/image-upload";
+
+const formSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  images: z.object({ url: z.url() }).array(),
+  price: z.coerce.number().min(1),
+  sizeId: z.string().min(1),
+  colorId: z.string().min(1),
+  categoryId: z.string().min(1),
+  isFeatured: z.boolean().default(false).optional(),
+  isArchived: z.boolean().default(false).optional(),
+});
+
+export function ProductForm({
+  initialData,
+  categories,
+  sizes,
+  colors,
+}: {
+  initialData: (Product & { images: Image[] }) | null;
+  categories: Category[];
+  sizes: Size[];
+  colors: Color[];
+}) {
+  const [loading, setLoading] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+
+  const router = useRouter();
+  const params = useParams();
+
+  const title = initialData ? "Edit product" : "Create product";
+  const description = initialData ? "Edit product" : "Add a new product";
+  const toastMessage = initialData
+    ? "Product updated successfully"
+    : "Product created successfully";
+  const action = initialData ? "Save changes" : "Create";
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: initialData
+      ? {
+          ...initialData,
+          price: parseFloat(String(initialData?.price)),
+        }
+      : {
+          name: "",
+          images: [],
+          price: 0,
+          categoryId: "",
+          sizeId: "",
+          colorId: "",
+          isFeatured: false,
+          isArchived: false,
+        },
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      setLoading(true);
+
+      if (initialData) {
+        await axios.patch(
+          `/api/${params.storeId}/products/${params.productId}`,
+          values,
+        );
+      } else {
+        await axios.post(`/api/${params.storeId}/products`, values);
+      }
+
+      toast.success(toastMessage);
+      router.push(`/${params.storeId}/products`);
+      router.refresh();
+    } catch {
+      toast.error("Something went wrong!!");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function onConfirm() {
+    try {
+      setIsDeleting(true);
+      await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
+      toast.success("Billboard deleted successfully");
+      setIsOpen(false);
+      router.push(`/${params.storeId}/products`);
+      router.refresh();
+    } catch {
+      toast.error("Make sure you removed all categories using this product");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  return (
+    <>
+      {initialData && (
+        <AlertModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          loading={isDeleting}
+          onConfirm={onConfirm}
+        />
+      )}
+      <Heading title={title} description={description}>
+        {initialData && (
+          <Button
+            variant="destructive"
+            size="icon"
+            onClick={() => setIsOpen(true)}
+          >
+            <TrashIcon />
+          </Button>
+        )}
+      </Heading>
+      <Separator />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <FormField
+            control={form.control}
+            name="images"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Background Image</FormLabel>
+                <FormControl>
+                  <ImageUpload
+                    value={field.value.map((image) => image.url)}
+                    disabled={loading}
+                    onChange={(url) =>
+                      field.onChange([...field.value, { url }])
+                    }
+                    onRemove={(url) =>
+                      field.onChange([
+                        ...field.value.filter((image) => image.url !== url),
+                      ])
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-3 gap-8">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      disabled={loading}
+                      placeholder="Product Name"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="price"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Price</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      disabled={loading}
+                      placeholder="Product Price"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="categoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger disabled={categories.length === 0}>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a Category"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Categories</SelectLabel>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="sizeId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Size</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a size"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Sizes</SelectLabel>
+                        {sizes.map((size) => (
+                          <SelectItem key={size.id} value={size.id}>
+                            {size.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="colorId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Color</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue
+                          defaultValue={field.value}
+                          placeholder="Select a color"
+                        />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectLabel>Colors</SelectLabel>
+                        {colors.map((color) => (
+                          <SelectItem
+                            style={{ display: "flex" }}
+                            key={color.id}
+                            value={color.id}
+                          >
+                            <span style={{ color: color.value }}>
+                              {color.name}
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isFeatured"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Featured</FormLabel>
+                    <FormDescription>
+                      The product will appear on the home page.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isArchived"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Archived</FormLabel>
+                    <FormDescription>
+                      The product will appear anywhere in the store.
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+          <div className="flex items-center gap-x-2">
+            <Button type="submit" disabled={loading || isDeleting}>
+              {action} {loading && <Spinner />}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </>
+  );
+}

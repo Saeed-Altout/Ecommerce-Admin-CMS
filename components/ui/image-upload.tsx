@@ -1,11 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import {
-  CldUploadWidget,
-  CloudinaryUploadWidgetResults,
-} from "next-cloudinary";
-import { ImagePlusIcon, TrashIcon } from "lucide-react";
+import { ImagePlus, Trash } from "lucide-react";
+import { CldUploadWidget } from "next-cloudinary";
 
 import { Button } from "@/components/ui/button";
 
@@ -16,14 +13,12 @@ export function ImageUpload({
   value,
 }: {
   disabled?: boolean;
-  onChange?: (url: string) => void;
-  onRemove?: (url: string) => void;
+  onChange?: (value: string) => void;
+  onRemove?: (value: string) => void;
   value: string[];
 }) {
-  const onUpload = (result: CloudinaryUploadWidgetResults) => {
-    if (onChange) {
-      onChange(result.info?.thumbnail_url);
-    }
+  const onUpload = (result: any) => {
+    onChange?.(result.info.secure_url);
   };
 
   return (
@@ -32,15 +27,16 @@ export function ImageUpload({
         {value.map((url) => (
           <div
             key={url}
-            className="relative size-[200px] overflow-hidden rounded-md"
+            className="relative h-[200px] w-[200px] overflow-hidden rounded-md"
           >
             <div className="absolute top-2 right-2 z-10">
               <Button
-                variant="destructive"
-                size="icon-sm"
+                type="button"
                 onClick={() => onRemove?.(url)}
+                variant="destructive"
+                size="icon"
               >
-                <TrashIcon className="size-3" />
+                <Trash className="h-4 w-4" />
               </Button>
             </div>
             <Image fill className="object-cover" alt="Image" src={url} />
@@ -48,20 +44,26 @@ export function ImageUpload({
         ))}
       </div>
       <CldUploadWidget
-        uploadPreset="upload-ecommarce-admin"
         onSuccess={onUpload}
+        uploadPreset="upload-ecommarce-admin"
       >
-        {({ open }) => (
-          <Button
-            disabled={disabled}
-            onClick={() => open()}
-            type="button"
-            variant="outline"
-          >
-            <ImagePlusIcon className="size-4" />
-            Upload
-          </Button>
-        )}
+        {({ open }) => {
+          const onClick = () => {
+            open();
+          };
+
+          return (
+            <Button
+              type="button"
+              disabled={disabled}
+              variant={"secondary"}
+              onClick={onClick}
+            >
+              <ImagePlus className="mr-2 h-4 w-4" />
+              Upload an Image
+            </Button>
+          );
+        }}
       </CldUploadWidget>
     </div>
   );
