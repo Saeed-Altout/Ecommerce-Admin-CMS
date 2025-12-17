@@ -22,28 +22,33 @@ export async function POST(
       isArchived,
     } = body;
 
-    const { storeId } = await params;
-
     if (!user?.id) {
-      return new NextResponse("Unauthenticated", { status: 401 });
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
     if (!name) {
       return new NextResponse("Name is required", { status: 400 });
     }
 
-    if (!price) new NextResponse("Price is required", { status: 400 });
+    if (!images || !images.length) {
+      return new NextResponse("Image is required", { status: 400 });
+    }
 
-    if (!categoryId)
-      new NextResponse("Category id is required", { status: 400 });
+    if (!price) {
+      return new NextResponse("Price is required", { status: 400 });
+    }
 
-    if (!colorId) new NextResponse("Color id is required", { status: 400 });
+    if (!categoryId) {
+      return new NextResponse("Category id is required", { status: 400 });
+    }
 
-    if (!sizeId) new NextResponse("Size id is required", { status: 400 });
+    if (!colorId) {
+      return new NextResponse("Color id is required", { status: 400 });
+    }
 
-    if (!isFeatured) new NextResponse("Featured is required", { status: 400 });
-
-    if (!isArchived) new NextResponse("Archived is required", { status: 400 });
+    if (!sizeId) {
+      return new NextResponse("Size id is required", { status: 400 });
+    }
 
     if (!storeId) {
       return new NextResponse("Store Id is required", { status: 400 });
@@ -52,7 +57,7 @@ export async function POST(
     const storeByUserId = await db.store.findFirst({
       where: {
         id: storeId,
-        userId,
+        userId: user.id,
       },
     });
 
@@ -63,25 +68,25 @@ export async function POST(
     const product = await db.product.create({
       data: {
         name,
-        images: {
-          createMany: {
-            data: [...images.map((image: { url: string }) => image)],
-          },
-        },
         price,
         isFeatured,
         isArchived,
         categoryId,
         sizeId,
         colorId,
+        images: {
+          createMany: {
+            data: [...images.map((image: { url: string }) => image)],
+          },
+        },
         storeId: storeId,
       },
     });
 
-    return NextResponse.json(product);
-  } catch (err) {
-    console.log(`[PRODUCTS_POST] ${err}`);
-    return new NextResponse(`Internal error`, { status: 500 });
+    return new NextResponse(JSON.stringify(product), { status: 201 });
+  } catch (error) {
+    console.log("ERROR POST PRODUCTS ROUTE", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
@@ -90,12 +95,18 @@ export async function GET(
   ctx: RouteContext<"/api/[storeId]/products">,
 ) {
   try {
+    const user = await currentUser();
     const { storeId } = await ctx.params;
     const { searchParams } = new URL(request.url);
+
     const categoryId = searchParams.get("categoryId") || undefined;
     const sizeId = searchParams.get("sizeId") || undefined;
     const colorId = searchParams.get("colorId") || undefined;
     const isFeatured = searchParams.get("isFeatured");
+
+    if (!user?.id) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
 
     if (!storeId) {
       return new NextResponse("Store Id is required", { status: 400 });
@@ -121,9 +132,9 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(products);
-  } catch (err) {
-    console.log(`[PRODUCTS_GET] ${err}`);
-    return new NextResponse(`Internal error`, { status: 500 });
+    return new NextResponse(JSON.stringify(products), { status: 200 });
+  } catch (error) {
+    console.log("ERROR GET PRODUCTS ROUTE", error);
+    return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

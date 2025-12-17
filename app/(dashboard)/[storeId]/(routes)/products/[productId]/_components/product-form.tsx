@@ -49,7 +49,7 @@ const formSchema = z.object({
     message: "Name must be at least 2 characters.",
   }),
   images: z.object({ url: z.url() }).array(),
-  price: z.coerce.number().min(1),
+  price: z.string().min(1),
   sizeId: z.string().min(1),
   colorId: z.string().min(1),
   categoryId: z.string().min(1),
@@ -87,12 +87,12 @@ export function ProductForm({
     defaultValues: initialData
       ? {
           ...initialData,
-          price: parseFloat(String(initialData?.price)),
+          price: initialData?.price.toString(),
         }
       : {
           name: "",
           images: [],
-          price: 0,
+          price: "0",
           categoryId: "",
           sizeId: "",
           colorId: "",
@@ -213,10 +213,14 @@ export function ProductForm({
                   <FormLabel>Price</FormLabel>
                   <FormControl>
                     <Input
-                      type="number"
                       disabled={loading}
                       placeholder="Product Price"
+                      inputMode="numeric"
                       {...field}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, "");
+                        field.onChange(value);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -236,7 +240,10 @@ export function ProductForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger disabled={categories.length === 0}>
+                      <SelectTrigger
+                        disabled={categories.length === 0}
+                        className="w-full"
+                      >
                         <SelectValue
                           defaultValue={field.value}
                           placeholder="Select a Category"
@@ -271,7 +278,10 @@ export function ProductForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger
+                        disabled={sizes.length === 0}
+                        className="w-full"
+                      >
                         <SelectValue
                           defaultValue={field.value}
                           placeholder="Select a size"
@@ -306,7 +316,10 @@ export function ProductForm({
                     defaultValue={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger
+                        disabled={colors.length === 0}
+                        className="w-full"
+                      >
                         <SelectValue
                           defaultValue={field.value}
                           placeholder="Select a color"
@@ -322,9 +335,11 @@ export function ProductForm({
                             key={color.id}
                             value={color.id}
                           >
-                            <span style={{ color: color.value }}>
-                              {color.name}
-                            </span>
+                            <span
+                              style={{ backgroundColor: color.value }}
+                              className="block size-4 rounded-full border"
+                            />
+                            {color.name}
                           </SelectItem>
                         ))}
                       </SelectGroup>

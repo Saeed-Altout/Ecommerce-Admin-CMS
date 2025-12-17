@@ -150,7 +150,7 @@ export function ColorForm({ initialData }: { initialData: Color | null }) {
                         {...field}
                       />
                       <span
-                        className="size-8 rounded-full border"
+                        className="size-6 rounded-full border"
                         style={{ backgroundColor: field.value }}
                       />
                     </div>

@@ -1,10 +1,10 @@
 import { format } from "date-fns";
 
 import { db } from "@/lib/db";
+import { formatPrice } from "@/lib/utils";
 
 import { ProductsClient } from "./_components/client";
 import { ProductColumn } from "./_components/columns";
-import { formatPrice } from "@/lib/utils";
 
 export default async function ProductsPage({
   params,

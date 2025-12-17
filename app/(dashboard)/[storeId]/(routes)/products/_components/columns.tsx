@@ -39,7 +39,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
     cell: ({ row }) => (
       <div className="flex items-center gap-x-2">
         <span
-          className="block size-8 rounded-full border"
+          className="block size-6 rounded-full border"
           style={{ backgroundColor: row.original.color }}
         />
         {row.original.color}

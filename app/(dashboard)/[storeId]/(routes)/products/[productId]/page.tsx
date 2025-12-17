@@ -36,6 +36,7 @@ export default async function ProductPage({
       createdAt: "desc",
     },
   });
+
   const sizes = await db.size.findMany({
     where: {
       storeId,
@@ -44,6 +45,7 @@ export default async function ProductPage({
       createdAt: "desc",
     },
   });
+
   const colors = await db.color.findMany({
     where: {
       storeId,
