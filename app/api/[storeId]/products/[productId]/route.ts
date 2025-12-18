@@ -7,12 +7,7 @@ export async function GET(
   ctx: RouteContext<"/api/[storeId]/products/[productId]">,
 ) {
   try {
-    const user = await currentUser();
     const { storeId, productId } = await ctx.params;
-
-    if (!user?.id) {
-      return new NextResponse("Unauthenticated", { status: 401 });
-    }
 
     if (!productId) {
       return new NextResponse("Product id is required", { status: 400 });

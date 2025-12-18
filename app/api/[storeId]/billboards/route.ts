@@ -42,7 +42,7 @@ export async function POST(
       data: {
         label,
         storeId,
-        image: imageUrl,
+        imageUrl,
       },
     });
 

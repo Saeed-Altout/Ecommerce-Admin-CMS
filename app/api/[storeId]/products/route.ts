@@ -95,7 +95,6 @@ export async function GET(
   ctx: RouteContext<"/api/[storeId]/products">,
 ) {
   try {
-    const user = await currentUser();
     const { storeId } = await ctx.params;
     const { searchParams } = new URL(request.url);
 
@@ -103,10 +102,6 @@ export async function GET(
     const sizeId = searchParams.get("sizeId") || undefined;
     const colorId = searchParams.get("colorId") || undefined;
     const isFeatured = searchParams.get("isFeatured");
-
-    if (!user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
 
     if (!storeId) {
       return new NextResponse("Store Id is required", { status: 400 });

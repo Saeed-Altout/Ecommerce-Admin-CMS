@@ -58,12 +58,7 @@ export async function GET(
   ctx: RouteContext<"/api/[storeId]/categories">,
 ) {
   try {
-    const user = await currentUser();
     const { storeId } = await ctx.params;
-
-    if (!user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
-    }
 
     if (!storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
@@ -72,7 +67,6 @@ export async function GET(
     const store = await db.store.findFirst({
       where: {
         id: storeId,
-        userId: user.id,
       },
     });
 

@@ -57,15 +57,10 @@ export function BillboardForm({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: initialData
-      ? {
-          label: initialData.label,
-          imageUrl: initialData.image,
-        }
-      : {
-          label: "",
-          imageUrl: "",
-        },
+    defaultValues: initialData ?? {
+      label: "",
+      imageUrl: "",
+    },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {

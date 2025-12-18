@@ -129,11 +129,6 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
         description={`${origin}/api/stores/${params.storeId}`}
         variant="public"
       />
-      <ApiAlert
-        title="NEXT_PUBLIC_ADMIN_API_URL"
-        description={`${origin}/api/stores/${params.storeId}`}
-        variant="admin"
-      />
     </>
   );
 }
