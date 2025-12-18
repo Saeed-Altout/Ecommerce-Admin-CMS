@@ -1,6 +1,5 @@
-import { UserButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
-
+import { currentUser } from "@/lib/auth";
+import { UserButton } from "@/components/auth/user-button";
 import { db } from "@/lib/db";
 
 import { StoreSwitcher } from "@/components/store-switcher";

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUser } from "@/lib/auth";
 
 import { db } from "@/lib/db";
 import { Navbar } from "@/components/navbar";
@@ -15,7 +15,7 @@ export default async function StoreLayout({
   const user = await currentUser();
 
   if (!user?.id) {
-    redirect("/sign-in");
+    redirect("/auth/login");
   }
 
   if (!storeId) {

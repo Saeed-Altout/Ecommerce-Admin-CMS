@@ -1,5 +1,5 @@
+import { currentUser } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
 export default async function SetupLayout({
@@ -10,7 +10,7 @@ export default async function SetupLayout({
   const user = await currentUser();
 
   if (!user?.id) {
-    redirect("/sign-in");
+    redirect("/auth/login");
   }
 
   const store = await db.store.findFirst({
