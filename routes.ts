@@ -29,4 +29,4 @@ export const apiAuthPrefix = "/api/auth";
  * The default redirect url after login
  * @type {string}
  */
-export const DEFAULT_LOGIN_REDIRECT = "/";
+export const DEFAULT_LOGIN_REDIRECT = "/getting-started";

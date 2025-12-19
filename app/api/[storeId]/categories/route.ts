@@ -55,19 +55,17 @@ export async function POST(
 
 export async function GET(
   _request: NextRequest,
-  ctx: RouteContext<"/api/[storeId]/categories">,
+  { params }: { params: { storeId: string } },
 ) {
   try {
-    const { storeId } = await ctx.params;
+    const { storeId } = params;
 
     if (!storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
     }
 
     const store = await db.store.findFirst({
-      where: {
-        id: storeId,
-      },
+      where: { id: storeId },
     });
 
     if (!store) {
@@ -75,14 +73,12 @@ export async function GET(
     }
 
     const categories = await db.category.findMany({
-      where: {
-        storeId,
-      },
+      where: { storeId },
     });
 
-    return new NextResponse(JSON.stringify(categories), { status: 200 });
+    return NextResponse.json(categories);
   } catch (error) {
-    console.log("ERROR GET CATEGORIES ROUTE", error);
+    console.error("ERROR GET CATEGORIES ROUTE", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

@@ -1,17 +1,19 @@
-"use client";
+import { getProducts } from "@/data/product";
+import { getBillboard } from "@/data/billboard";
 
-import { useStoreModal } from "@/hooks/use-store-modal";
-import { useEffect } from "react";
+import { Billboard } from "../_components/billboard";
+import { ProductList } from "../_components/product-list";
 
-export default function SetupPage() {
-  const isOpen = useStoreModal((state) => state.isOpen);
-  const onOpen = useStoreModal((state) => state.onOpen);
+export default async function HomePage() {
+  const billboard = await getBillboard(process.env.NEXT_PUBLIC_BILLBOARD_ID!);
+  const products = await getProducts();
 
-  useEffect(() => {
-    if (!isOpen) {
-      onOpen();
-    }
-  }, [isOpen, onOpen]);
-
-  return null;
+  return (
+    <div className="space-y-10 pb-10">
+      <Billboard data={billboard!} />
+      <div className="flex flex-col gap-y-8 px-4 sm:px-6 lg:px-8">
+        <ProductList title="Featured Products" items={products} />
+      </div>
+    </div>
+  );
 }

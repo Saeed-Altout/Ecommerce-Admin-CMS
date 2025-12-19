@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export function Modal({
   title,
@@ -14,12 +15,14 @@ export function Modal({
   isOpen,
   onClose,
   children,
+  className,
 }: {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   isOpen: boolean;
   onClose?: () => void;
   children?: React.ReactNode;
+  className?: string;
 }) {
   const onOpenChange = (open: boolean) => {
     if (!open) {
@@ -28,7 +31,7 @@ export function Modal({
   };
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className={cn("sm:max-w-[425px]", className)}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

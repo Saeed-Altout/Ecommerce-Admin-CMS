@@ -1,27 +1,32 @@
-import { currentUser } from "@/lib/auth";
-import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+import { Urbanist } from "next/font/google";
 
-export default async function SetupLayout({
+import { Footer } from "./_components/footer";
+import { Navbar } from "./_components/navbar";
+import { Container } from "@/components/ui/container";
+
+const urbanist = Urbanist({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+});
+
+export const metadata: Metadata = {
+  title: "Store",
+  description: "E-Commerce Store",
+};
+
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await currentUser();
-
-  if (!user?.id) {
-    redirect("/auth/login");
-  }
-
-  const store = await db.store.findFirst({
-    where: {
-      userId: user.id,
-    },
-  });
-
-  if (store) {
-    redirect(`/${store.id}`);
-  }
-
-  return <>{children}</>;
+  return (
+    <div className={`${urbanist.className} antialiased`}>
+      <Navbar />
+      <main className="min-h-[calc(100vh-200px)]">
+        <Container>{children}</Container>
+      </main>
+      <Footer />
+    </div>
+  );
 }
