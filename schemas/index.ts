@@ -88,3 +88,12 @@ export const productSchema = z.object({
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
 });
+
+export const orderSchema = z.object({
+  label: z.string().min(2, {
+    message: "Label must be at least 2 characters.",
+  }),
+  imageUrl: z.url({
+    message: "Image URL must be a valid URL.",
+  }),
+});

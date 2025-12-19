@@ -1,9 +1,11 @@
 import { format } from "date-fns";
 
-import { db } from "@/lib/db";
+import { getOrdersByStoreId } from "@/data/order";
+import { OrderColumn, columns } from "./_components/columns";
 
-import { OrdersClient } from "./_components/client";
-import { OrderColumn } from "./_components/columns";
+import { Heading } from "@/components/ui/heading";
+import { Separator } from "@/components/ui/separator";
+import { DataTable } from "@/components/ui/data-table";
 
 export default async function OrdersPage({
   params,
@@ -11,21 +13,7 @@ export default async function OrdersPage({
   params: Promise<{ storeId: string }>;
 }) {
   const storeId = (await params).storeId;
-  const orders = await db.order.findMany({
-    where: {
-      storeId,
-    },
-    include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const orders = await getOrdersByStoreId(storeId);
 
   const formattedOrders: OrderColumn[] = orders.map((order) => ({
     id: order.id,
@@ -37,8 +25,21 @@ export default async function OrdersPage({
       (total, item) => +item.product.price + total,
       0,
     ),
-    createdAt: format(order.createdAt, "PPP"),
+    createdAt: format(order.createdAt, "PP"),
   }));
 
-  return <OrdersClient data={formattedOrders} />;
+  return (
+    <>
+      <Heading
+        title={`Orders (${formattedOrders.length})`}
+        description="Manage all your orders from one centralized dashboard."
+      />
+      <Separator />
+      <DataTable
+        columns={columns}
+        data={formattedOrders}
+        searchKey="products"
+      />
+    </>
+  );
 }
