@@ -34,9 +34,9 @@ export function ImageUpload({
                 type="button"
                 onClick={() => onRemove?.(url)}
                 variant="destructive"
-                size="icon"
+                size="icon-sm"
               >
-                <Trash className="h-4 w-4" />
+                <Trash />
               </Button>
             </div>
             <Image fill className="object-cover" alt="Image" src={url} />

@@ -1,15 +1,21 @@
 "use client";
-import { TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
+
+import { TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Billboard } from "@/lib/generated/prisma/client";
+import {
+  useCreateBillboard,
+  useDeleteBillboard,
+  useUpdateBillboard,
+} from "@/services/billboard/mutation";
+import { Billboard } from "@/lib/prisma/client";
+import { billboardSchema } from "@/schemas";
 
 import {
   Form,
@@ -27,26 +33,21 @@ import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { ImageUpload } from "@/components/ui/image-upload";
 
-const formSchema = z.object({
-  label: z.string().min(2, {
-    message: "Label must be at least 2 characters.",
-  }),
-  imageUrl: z.url({
-    message: "Image URL must be a valid URL.",
-  }),
-});
-
 export function BillboardForm({
   initialData,
 }: {
   initialData: Billboard | null;
 }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const router = useRouter();
+  const params = useParams<{ billboardId: string; storeId: string }>();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const router = useRouter();
-  const params = useParams();
+  const { mutate: remove, isPending: isDeleting } = useDeleteBillboard();
+  const { mutate: create, isPending: isCreating } = useCreateBillboard();
+  const { mutate: update, isPending: isUpdating } = useUpdateBillboard();
+
+  const isPending = isCreating || isUpdating;
 
   const title = initialData ? "Edit billboard" : "Create billboard";
   const description = initialData ? "Edit billboard" : "Add a new billboard";
@@ -55,52 +56,60 @@ export function BillboardForm({
     : "Billboard created successfully";
   const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof billboardSchema>>({
+    resolver: zodResolver(billboardSchema),
     defaultValues: initialData ?? {
       label: "",
       imageUrl: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setLoading(true);
+  const onSuccess = () => {
+    toast.success(toastMessage);
+    router.push(`/dashboard/${params.storeId}/billboards`);
+    router.refresh();
+  };
 
-      if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/billboards/${params.billboardId}`,
-          values,
-        );
-      } else {
-        await axios.post(`/api/${params.storeId}/billboards`, values);
-      }
-
-      toast.success(toastMessage);
-      router.push(`/${params.storeId}/billboards`);
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setLoading(false);
+  async function onSubmit(values: z.infer<typeof billboardSchema>) {
+    if (initialData) {
+      update(
+        {
+          ...values,
+          storeId: params.storeId,
+          billboardId: params.billboardId,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
+    } else {
+      create(
+        { ...values, storeId: params.storeId },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
     }
   }
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(
-        `/api/${params.storeId}/billboards/${params.billboardId}`,
-      );
-      toast.success("Billboard deleted successfully");
-      setIsOpen(false);
-      router.push(`/${params.storeId}/billboards`);
-      router.refresh();
-    } catch {
-      toast.error("Make sure you removed all categories using this billboard");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      {
+        storeId: params.storeId,
+        billboardId: params.billboardId,
+      },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          router.push(`/dashboard/${params.storeId}/billboards`);
+          router.refresh();
+        },
+      },
+    );
   }
 
   return (
@@ -119,6 +128,7 @@ export function BillboardForm({
             variant="destructive"
             size="icon"
             onClick={() => setIsOpen(true)}
+            disabled={isPending}
           >
             <TrashIcon />
           </Button>
@@ -138,7 +148,7 @@ export function BillboardForm({
                     value={field.value ? [field.value] : []}
                     onChange={(url) => field.onChange(url)}
                     onRemove={() => field.onChange("")}
-                    disabled={loading || isDeleting}
+                    disabled={isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -155,7 +165,7 @@ export function BillboardForm({
                   <FormControl>
                     <Input
                       placeholder="Billboard label"
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -165,8 +175,17 @@ export function BillboardForm({
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading || isDeleting}>
-              {action} {loading && <Spinner />}
+            <Button type="submit" disabled={isPending}>
+              {isPending && <Spinner />}
+              {action}
+            </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              Cancel
             </Button>
           </div>
         </form>

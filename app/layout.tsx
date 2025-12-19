@@ -8,6 +8,7 @@ import { SessionProvider } from "next-auth/react";
 import { ModalProvider } from "@/providers/modal-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { auth } from "@/auth";
+import QueryProviders from "@/providers/query-provider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -27,13 +28,15 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <SessionProvider session={session}>
-      <html lang="en">
-        <body className={`${poppins.className} antialiased`}>
-          <ModalProvider />
-          <Toaster />
-          {children}
-        </body>
-      </html>
+      <QueryProviders>
+        <html lang="en">
+          <body className={`${poppins.className} antialiased`}>
+            <ModalProvider />
+            <Toaster />
+            {children}
+          </body>
+        </html>
+      </QueryProviders>
     </SessionProvider>
   );
 }

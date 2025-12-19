@@ -1,9 +1,6 @@
-import { currentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-
-import { db } from "@/lib/db";
-
 import { BillboardForm } from "./_components/billboard-form";
+
+import { getBillboard } from "@/data/billboard";
 
 export default async function BillboardsPage({
   params,
@@ -11,17 +8,7 @@ export default async function BillboardsPage({
   params: Promise<{ billboardId: string }>;
 }) {
   const billboardId = (await params).billboardId;
-  const user = await currentUser();
-
-  if (!user?.id) {
-    redirect("/sign-in");
-  }
-
-  const billboard = await db.billboard.findUnique({
-    where: {
-      id: billboardId,
-    },
-  });
+  const billboard = await getBillboard(billboardId);
 
   return <BillboardForm initialData={billboard} />;
 }

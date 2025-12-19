@@ -41,3 +41,12 @@ export const settingsSchema = z
     path: ["confirmNewPassword"],
     message: "New passwords do not match",
   });
+
+export const billboardSchema = z.object({
+  label: z.string().min(2, {
+    message: "Label must be at least 2 characters.",
+  }),
+  imageUrl: z.url({
+    message: "Image URL must be a valid URL.",
+  }),
+});

@@ -30,3 +30,9 @@ export const apiAuthPrefix = "/api/auth";
  * @type {string}
  */
 export const DEFAULT_LOGIN_REDIRECT = "/getting-started";
+
+/**
+ * The login page
+ * @type {string}
+ */
+export const LOGIN = "/auth/login";

@@ -41,9 +41,7 @@ export function ApiAlert({ title, description, variant }: ApiAlertProps) {
         <Badge variant={variantMap[variant]}>{textMap[variant]}</Badge>
       </AlertTitle>
       <AlertDescription className="flex items-center justify-between gap-x-2">
-        <code>
-          <Badge variant="secondary">{description}</Badge>
-        </code>
+        <code>{description}</code>
         <Button
           variant="outline"
           size="icon-sm"
@@ -51,11 +49,7 @@ export function ApiAlert({ title, description, variant }: ApiAlertProps) {
           className="opacity-0 transition-opacity group-hover:opacity-100"
         >
           <span className="sr-only">{copied ? "Copied" : "Copy"}</span>
-          {copied ? (
-            <CheckIcon className="size-3" />
-          ) : (
-            <CopyIcon className="size-3" />
-          )}
+          {copied ? <CheckIcon /> : <CopyIcon />}
         </Button>
       </AlertDescription>
     </Alert>

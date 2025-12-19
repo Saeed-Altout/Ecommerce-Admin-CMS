@@ -10,3 +10,15 @@ export const getBillboard = async (id: string) => {
     return null;
   }
 };
+
+export const getBillboards = async (storeId: string) => {
+  try {
+    const billboards = await db.billboard.findMany({
+      where: { storeId },
+      orderBy: { createdAt: "desc" },
+    });
+    return billboards;
+  } catch {
+    return [];
+  }
+};

@@ -3,6 +3,7 @@ import { currentUser } from "@/lib/auth";
 
 import { db } from "@/lib/db";
 import { Navbar } from "@/components/navbar";
+import { DEFAULT_LOGIN_REDIRECT, LOGIN } from "@/routes";
 
 export default async function StoreLayout({
   children,
@@ -15,11 +16,11 @@ export default async function StoreLayout({
   const user = await currentUser();
 
   if (!user?.id) {
-    redirect("/auth/login");
+    redirect(LOGIN);
   }
 
   if (!storeId) {
-    redirect("/");
+    redirect(DEFAULT_LOGIN_REDIRECT);
   }
 
   const store = await db.store.findFirst({
@@ -30,7 +31,7 @@ export default async function StoreLayout({
   });
 
   if (!store) {
-    redirect("/");
+    redirect(DEFAULT_LOGIN_REDIRECT);
   }
 
   return (
