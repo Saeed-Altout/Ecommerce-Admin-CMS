@@ -1,15 +1,21 @@
 "use client";
-import { TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
+
+import { TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Color } from "@/lib/generated/prisma/client";
+import {
+  useCreateColor,
+  useDeleteColor,
+  useUpdateColor,
+} from "@/services/color/mutation";
+import { Color } from "@/lib/prisma/client";
+import { colorSchema } from "@/schemas";
 
 import {
   Form,
@@ -26,20 +32,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  value: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
-});
-
 export function ColorForm({ initialData }: { initialData: Color | null }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ storeId: string; colorId: string }>();
+
+  const { mutate: remove, isPending: isDeleting } = useDeleteColor();
+  const { mutate: create, isPending: isCreating } = useCreateColor();
+  const { mutate: update, isPending: isUpdating } = useUpdateColor();
+
+  const isPending = isCreating || isUpdating;
 
   const title = initialData ? "Edit color" : "Create color";
   const description = initialData ? "Edit color" : "Add a new color";
@@ -48,50 +51,60 @@ export function ColorForm({ initialData }: { initialData: Color | null }) {
     : "Color created successfully";
   const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof colorSchema>>({
+    resolver: zodResolver(colorSchema),
     defaultValues: initialData ?? {
       name: "",
       value: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setLoading(true);
+  const onSuccess = () => {
+    toast.success(toastMessage);
+    router.push(`/dashboard/${params.storeId}/colors`);
+    router.refresh();
+  };
 
-      if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/colors/${params.colorId}`,
-          values,
-        );
-      } else {
-        await axios.post(`/api/${params.storeId}/colors`, values);
-      }
-
-      toast.success(toastMessage);
-      router.push(`/${params.storeId}/colors`);
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setLoading(false);
+  async function onSubmit(values: z.infer<typeof colorSchema>) {
+    if (initialData) {
+      update(
+        {
+          ...values,
+          storeId: params.storeId,
+          colorId: params.colorId,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
+    } else {
+      create(
+        { ...values, storeId: params.storeId },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
     }
   }
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(`/api/${params.storeId}/colors/${params.colorId}`);
-      toast.success("Size deleted successfully");
-      setIsOpen(false);
-      router.push(`/${params.storeId}/colors`);
-      router.refresh();
-    } catch {
-      toast.error("Make sure you removed all categories using this color");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      {
+        storeId: params.storeId,
+        colorId: params.colorId,
+      },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          router.push(`/dashboard/${params.storeId}/colors`);
+          router.refresh();
+        },
+      },
+    );
   }
 
   return (
@@ -109,6 +122,7 @@ export function ColorForm({ initialData }: { initialData: Color | null }) {
           <Button
             variant="destructive"
             size="icon"
+            disabled={isPending}
             onClick={() => setIsOpen(true)}
           >
             <TrashIcon />
@@ -128,7 +142,7 @@ export function ColorForm({ initialData }: { initialData: Color | null }) {
                   <FormControl>
                     <Input
                       placeholder="Size name"
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -146,11 +160,11 @@ export function ColorForm({ initialData }: { initialData: Color | null }) {
                     <div className="flex items-center gap-x-2">
                       <Input
                         placeholder="Size value"
-                        disabled={loading || isDeleting}
+                        disabled={isPending}
                         {...field}
                       />
                       <span
-                        className="size-6 rounded-full border"
+                        className="size-8 rounded-full border"
                         style={{ backgroundColor: field.value }}
                       />
                     </div>
@@ -161,8 +175,16 @@ export function ColorForm({ initialData }: { initialData: Color | null }) {
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading || isDeleting}>
-              {action} {loading && <Spinner />}
+            <Button type="submit" disabled={isPending}>
+              {action} {isPending && <Spinner />}
+            </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              onClick={() => router.back()}
+              variant="outline"
+            >
+              Cancel
             </Button>
           </div>
         </form>

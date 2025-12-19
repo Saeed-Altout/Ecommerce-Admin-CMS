@@ -1,8 +1,4 @@
-import { currentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-
-import { db } from "@/lib/db";
-
+import { getColorById } from "@/data/color";
 import { ColorForm } from "./_components/color-form";
 
 export default async function ColorPage({
@@ -11,17 +7,7 @@ export default async function ColorPage({
   params: Promise<{ colorId: string }>;
 }) {
   const colorId = (await params).colorId;
-  const user = await currentUser();
-
-  if (!user?.id) {
-    redirect("/sign-in");
-  }
-
-  const color = await db.color.findUnique({
-    where: {
-      id: colorId,
-    },
-  });
+  const color = await getColorById(colorId);
 
   return <ColorForm initialData={color} />;
 }
