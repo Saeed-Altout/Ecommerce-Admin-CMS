@@ -1,24 +1,20 @@
 "use client";
+
+import { XIcon } from "lucide-react";
+import Image from "next/image";
+
+import { useCart } from "@/hooks/use-cart";
+
 import { Currency } from "@/components/ui/currency";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/hooks/use-cart";
-import { X } from "lucide-react";
-import Image from "next/image";
-import {
-  Product,
-  Image as ImageType,
-  Size as SizeType,
-  Color as ColorType,
-} from "@/lib/prisma/client";
 
-interface CartItemProps {
-  data: Product & { images: ImageType[]; size: SizeType; color: ColorType };
-}
+import { ProductType } from "@/components/store/product-list";
 
-const CartItem: React.FC<CartItemProps> = ({ data }) => {
+export function CartItem({ data }: { data: ProductType }) {
   const cart = useCart();
 
-  const onRemove = () => {
+  const onRemove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     cart.removeItem(data.id);
   };
 
@@ -28,23 +24,24 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
         <Image
           fill
           src={data.images[0].url}
-          alt=""
-          className="object-cover object-center"
+          alt="image-cart-item"
+          className="rounded-md object-cover object-center"
         />
       </div>
       <div className="relative ml-4 flex flex-1 flex-col justify-between sm:ml-6">
         <div className="absolute top-0 right-0 z-10">
-          <Button onClick={onRemove}>
-            <X />
+          <Button onClick={onRemove} size="icon-sm" variant="destructive">
+            <span className="sr-only">Remove</span>
+            <XIcon />
           </Button>
         </div>
         <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
           <div className="flex justify-between">
-            <p className="text-lg font-semibold text-black">{data.name}</p>
+            <p className="text-lg font-semibold">{data.name}</p>
           </div>
           <div className="mt-1 flex text-sm">
-            <p className="text-gray-500">{data.color.name}</p>
-            <p className="ml-4 border-l border-gray-200 pl-4 text-gray-500">
+            <p className="text-muted-foreground">{data.color.name}</p>
+            <p className="text-muted-foreground ml-4 border-l pl-4">
               {data.size.name}
             </p>
           </div>
@@ -53,6 +50,4 @@ const CartItem: React.FC<CartItemProps> = ({ data }) => {
       </div>
     </li>
   );
-};
-
-export default CartItem;
+}
