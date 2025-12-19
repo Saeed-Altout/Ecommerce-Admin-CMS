@@ -1,5 +1,16 @@
 import { db } from "@/lib/db";
 
+export async function getColors() {
+  try {
+    const colors = db.color.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return colors;
+  } catch {
+    return [];
+  }
+}
+
 export async function getColorsByStoreId(storeId: string) {
   try {
     const colors = db.color.findMany({
