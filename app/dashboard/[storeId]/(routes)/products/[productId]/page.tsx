@@ -1,9 +1,8 @@
-import { currentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-
-import { db } from "@/lib/db";
-
 import { ProductForm } from "./_components/product-form";
+import { getProductById } from "@/data/product";
+import { getCategoriesByStoreId } from "@/data/category";
+import { getSizesByStoreId } from "@/data/size";
+import { getColorsByStoreId } from "@/data/color";
 
 export default async function ProductPage({
   params,
@@ -13,47 +12,10 @@ export default async function ProductPage({
   const productId = (await params).productId;
   const storeId = (await params).storeId;
 
-  const user = await currentUser();
-
-  if (!user?.id) {
-    redirect("/sign-in");
-  }
-
-  const product = await db.product.findUnique({
-    where: {
-      id: productId,
-    },
-    include: {
-      images: true,
-    },
-  });
-
-  const categories = await db.category.findMany({
-    where: {
-      storeId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  const sizes = await db.size.findMany({
-    where: {
-      storeId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-
-  const colors = await db.color.findMany({
-    where: {
-      storeId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const product = await getProductById(productId);
+  const categories = await getCategoriesByStoreId(storeId);
+  const sizes = await getSizesByStoreId(storeId);
+  const colors = await getColorsByStoreId(storeId);
 
   return (
     <ProductForm

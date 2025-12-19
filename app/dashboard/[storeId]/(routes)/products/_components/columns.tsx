@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { CellAction } from "./cell-action";
+import { ColorItem } from "@/components/ui/color-item";
 
 export interface ProductColumn {
   id: string;
@@ -36,15 +37,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
   {
     accessorKey: "color",
     header: "Color",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-x-2">
-        <span
-          className="block size-6 rounded-full border"
-          style={{ backgroundColor: row.original.color }}
-        />
-        {row.original.color}
-      </div>
-    ),
+    cell: ({ row }) => <ColorItem color={row.original.color} />,
   },
   {
     accessorKey: "category",
@@ -60,6 +53,7 @@ export const columns: ColumnDef<ProductColumn>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

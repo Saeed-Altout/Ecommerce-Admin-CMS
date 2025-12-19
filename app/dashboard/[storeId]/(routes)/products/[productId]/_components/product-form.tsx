@@ -1,27 +1,27 @@
 "use client";
-import { TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
+
+import { TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import {
-  Category,
-  Color,
-  Image,
-  Product,
-  Size,
-} from "@/lib/generated/prisma/client";
+  useCreateProduct,
+  useDeleteProduct,
+  useUpdateProduct,
+} from "@/services/product/mutation";
+import { Category, Color, Image, Product, Size } from "@/lib/prisma/client";
+import { productSchema } from "@/schemas";
 
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
+  FormDescription,
   FormItem,
   FormLabel,
   FormMessage,
@@ -29,11 +29,11 @@ import {
 import {
   Select,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  SelectGroup,
-  SelectLabel,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
@@ -43,19 +43,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { ImageUpload } from "@/components/ui/image-upload";
-
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  images: z.object({ url: z.url() }).array(),
-  price: z.string().min(1),
-  sizeId: z.string().min(1),
-  colorId: z.string().min(1),
-  categoryId: z.string().min(1),
-  isFeatured: z.boolean().default(false).optional(),
-  isArchived: z.boolean().default(false).optional(),
-});
 
 export function ProductForm({
   initialData,
@@ -68,12 +55,16 @@ export function ProductForm({
   sizes: Size[];
   colors: Color[];
 }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const router = useRouter();
+  const params = useParams<{ productId: string; storeId: string }>();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const router = useRouter();
-  const params = useParams();
+  const { mutate: remove, isPending: isDeleting } = useDeleteProduct();
+  const { mutate: create, isPending: isCreating } = useCreateProduct();
+  const { mutate: update, isPending: isUpdating } = useUpdateProduct();
+
+  const isPending = isCreating || isUpdating;
 
   const title = initialData ? "Edit product" : "Create product";
   const description = initialData ? "Edit product" : "Add a new product";
@@ -82,8 +73,8 @@ export function ProductForm({
     : "Product created successfully";
   const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof productSchema>>({
+    resolver: zodResolver(productSchema),
     defaultValues: initialData
       ? {
           ...initialData,
@@ -101,42 +92,52 @@ export function ProductForm({
         },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setLoading(true);
+  const onSuccess = () => {
+    toast.success(toastMessage);
+    router.push(`/dashboard/${params.storeId}/products`);
+    router.refresh();
+  };
 
-      if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/products/${params.productId}`,
-          values,
-        );
-      } else {
-        await axios.post(`/api/${params.storeId}/products`, values);
-      }
-
-      toast.success(toastMessage);
-      router.push(`/${params.storeId}/products`);
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setLoading(false);
+  async function onSubmit(values: z.infer<typeof productSchema>) {
+    if (initialData) {
+      update(
+        {
+          ...values,
+          storeId: params.storeId,
+          productId: params.productId,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
+    } else {
+      create(
+        { ...values, storeId: params.storeId },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
     }
   }
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(`/api/${params.storeId}/products/${params.productId}`);
-      toast.success("Billboard deleted successfully");
-      setIsOpen(false);
-      router.push(`/${params.storeId}/products`);
-      router.refresh();
-    } catch {
-      toast.error("Make sure you removed all categories using this product");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      {
+        storeId: params.storeId,
+        productId: params.productId,
+      },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          router.push(`/dashboard/${params.storeId}/products`);
+          router.refresh();
+        },
+      },
+    );
   }
 
   return (
@@ -154,6 +155,7 @@ export function ProductForm({
           <Button
             variant="destructive"
             size="icon"
+            disabled={isPending}
             onClick={() => setIsOpen(true)}
           >
             <TrashIcon />
@@ -172,7 +174,7 @@ export function ProductForm({
                 <FormControl>
                   <ImageUpload
                     value={field.value.map((image) => image.url)}
-                    disabled={loading}
+                    disabled={isPending}
                     onChange={(url) =>
                       field.onChange([...field.value, { url }])
                     }
@@ -196,7 +198,7 @@ export function ProductForm({
                   <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={loading}
+                      disabled={isPending}
                       placeholder="Product Name"
                       {...field}
                     />
@@ -213,7 +215,7 @@ export function ProductForm({
                   <FormLabel>Price</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={loading}
+                      disabled={isPending}
                       placeholder="Product Price"
                       inputMode="numeric"
                       {...field}
@@ -234,7 +236,7 @@ export function ProductForm({
                 <FormItem>
                   <FormLabel>Category</FormLabel>
                   <Select
-                    disabled={loading}
+                    disabled={isPending}
                     onValueChange={field.onChange}
                     value={field.value}
                     defaultValue={field.value}
@@ -272,7 +274,7 @@ export function ProductForm({
                 <FormItem>
                   <FormLabel>Size</FormLabel>
                   <Select
-                    disabled={loading}
+                    disabled={isPending}
                     onValueChange={field.onChange}
                     value={field.value}
                     defaultValue={field.value}
@@ -310,7 +312,7 @@ export function ProductForm({
                 <FormItem>
                   <FormLabel>Color</FormLabel>
                   <Select
-                    disabled={loading}
+                    disabled={isPending}
                     onValueChange={field.onChange}
                     value={field.value}
                     defaultValue={field.value}
@@ -358,6 +360,7 @@ export function ProductForm({
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      disabled={isPending}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -378,6 +381,7 @@ export function ProductForm({
                     <Checkbox
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      disabled={isPending}
                     />
                   </FormControl>
                   <div className="space-y-1 leading-none">
@@ -391,8 +395,16 @@ export function ProductForm({
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading || isDeleting}>
-              {action} {loading && <Spinner />}
+            <Button type="submit" disabled={isPending}>
+              {action} {isPending && <Spinner />}
+            </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              onClick={() => router.back()}
+              variant="outline"
+            >
+              Cancel
             </Button>
           </div>
         </form>

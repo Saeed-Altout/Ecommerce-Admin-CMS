@@ -1,12 +1,13 @@
 "use client";
 
-import axios from "axios";
-import { toast } from "sonner";
 import { useState } from "react";
-import { EditIcon, MoreHorizontal, CopyIcon, TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 
+import { EditIcon, MoreHorizontal, CopyIcon, TrashIcon } from "lucide-react";
+
 import { ProductColumn } from "./columns";
+import { useDeleteProduct } from "@/services/product/mutation";
+import { onCopy } from "@/helpers/on-copy";
 
 import {
   DropdownMenu,
@@ -19,34 +20,28 @@ import { Button } from "@/components/ui/button";
 import { AlertModal } from "@/components/modals/alert-modal";
 
 export function CellAction({ data }: { data: ProductColumn }) {
-  const router = useRouter();
-  const params = useParams();
-
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  function onCopy(id: string) {
-    if (!id) {
-      toast.error("Product ID not found");
-      return;
-    }
-    navigator.clipboard.writeText(id);
-    toast.success("Product ID copied to clipboard");
-  }
+  const router = useRouter();
+  const params = useParams<{ storeId: string }>();
+
+  const { mutate: remove, isPending: isDeleting } = useDeleteProduct();
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(`/api/${params.storeId}/products/${data.id}`);
-      toast.success("Product deleted successfully");
-      setIsOpen(false);
-      router.refresh();
-    } catch {
-      toast.error("Make sure you removed all categories using this product");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      {
+        storeId: params.storeId,
+        productId: data.id,
+      },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          router.refresh();
+        },
+      },
+    );
   }
+
   return (
     <>
       <AlertModal
@@ -57,31 +52,33 @@ export function CellAction({ data }: { data: ProductColumn }) {
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
+          <Button variant="ghost" size="icon-sm" disabled={isDeleting}>
             <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
+            disabled={isDeleting}
             onClick={() =>
-              router.push(`/${params.storeId}/products/${data.id}`)
+              router.push(`/dashboard/${params.storeId}/products/${data.id}`)
             }
           >
-            <EditIcon className="size-4" />
-            Edit
+            <EditIcon />
+            <span>Edit</span>
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onCopy(data.id)}>
-            <CopyIcon className="size-4" />
-            Copy ID
+            <CopyIcon />
+            <span>Copy ID</span>
           </DropdownMenuItem>
           <DropdownMenuItem
+            disabled={isDeleting}
             onClick={() => setIsOpen(true)}
             variant="destructive"
           >
-            <TrashIcon className="size-4" />
-            Delete
+            <TrashIcon />
+            <span>Delete</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
