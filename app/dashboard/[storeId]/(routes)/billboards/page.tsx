@@ -10,7 +10,7 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { ApiList } from "@/components/ui/api-list";
-import { getBillboards } from "@/data/billboard";
+import { getBillboardsByStoreId } from "@/data/billboard";
 
 export default async function BillboardsPage({
   params,
@@ -18,7 +18,7 @@ export default async function BillboardsPage({
   params: Promise<{ storeId: string }>;
 }) {
   const storeId = (await params).storeId;
-  const billboards = await getBillboards(storeId);
+  const billboards = await getBillboardsByStoreId(storeId);
 
   const formattedBillboards: BillboardColumn[] = billboards.map(
     (billboard) => ({

@@ -1,4 +1,4 @@
-import { getCategory } from "@/data/category";
+import { getCategoryById } from "@/data/category";
 import { getSuggestProducts } from "@/data/product";
 
 import { getColors } from "@/data/color";
@@ -29,7 +29,7 @@ export default async function CategoryPage({
 
   const sizes = await getSizes();
   const colors = await getColors();
-  const category = await getCategory(categoryId);
+  const category = await getCategoryById(categoryId);
 
   return (
     <div className="py-10">

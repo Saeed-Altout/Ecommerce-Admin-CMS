@@ -1,15 +1,21 @@
 "use client";
-import { TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
+
+import { TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Billboard, Category } from "@/lib/generated/prisma/client";
+import {
+  useCreateCategory,
+  useDeleteCategory,
+  useUpdateCategory,
+} from "@/services/category/mutation";
+import { Billboard, Category } from "@/lib/prisma/client";
+import { categorySchema } from "@/schemas";
 
 import {
   Form,
@@ -35,15 +41,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  billboardId: z.string().min(1, {
-    message: "Billboard is required.",
-  }),
-});
-
 export function CategoryForm({
   initialData,
   billboards,
@@ -51,12 +48,16 @@ export function CategoryForm({
   initialData: Category | null;
   billboards: Billboard[];
 }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ storeId: string; categoryId: string }>();
+
+  const { mutate: remove, isPending: isDeleting } = useDeleteCategory();
+  const { mutate: create, isPending: isCreating } = useCreateCategory();
+  const { mutate: update, isPending: isUpdating } = useUpdateCategory();
+
+  const isPending = isCreating || isUpdating;
 
   const title = initialData ? "Edit category" : "Create category";
   const description = initialData ? "Edit category" : "Add a new category";
@@ -65,52 +66,60 @@ export function CategoryForm({
     : "Category created successfully";
   const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof categorySchema>>({
+    resolver: zodResolver(categorySchema),
     defaultValues: initialData ?? {
       name: "",
       billboardId: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setLoading(true);
+  const onSuccess = () => {
+    toast.success(toastMessage);
+    router.push(`/dashboard/${params.storeId}/categories`);
+    router.refresh();
+  };
 
-      if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/categories/${params.categoryId}`,
-          values,
-        );
-      } else {
-        await axios.post(`/api/${params.storeId}/categories`, values);
-      }
-
-      toast.success(toastMessage);
-      router.push(`/${params.storeId}/categories`);
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setLoading(false);
+  async function onSubmit(values: z.infer<typeof categorySchema>) {
+    if (initialData) {
+      update(
+        {
+          ...values,
+          storeId: params.storeId,
+          categoryId: params.categoryId,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
+    } else {
+      create(
+        { ...values, storeId: params.storeId },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
     }
   }
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(
-        `/api/${params.storeId}/categories/${params.categoryId}`,
-      );
-      toast.success("Category deleted successfully");
-      router.push(`/${params.storeId}/categories`);
-      setIsOpen(false);
-      router.refresh();
-    } catch {
-      toast.error("Make sure you removed all categories using this Category");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      {
+        storeId: params.storeId,
+        categoryId: params.categoryId,
+      },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          router.push(`/dashboard/${params.storeId}/categories`);
+          router.refresh();
+        },
+      },
+    );
   }
 
   return (
@@ -126,8 +135,9 @@ export function CategoryForm({
       <Heading title={title} description={description}>
         {initialData && (
           <Button
-            variant="destructive"
             size="icon"
+            disabled={isPending}
+            variant="destructive"
             onClick={() => setIsOpen(true)}
           >
             <TrashIcon />
@@ -147,7 +157,7 @@ export function CategoryForm({
                   <FormControl>
                     <Input
                       placeholder="Category name"
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -163,7 +173,7 @@ export function CategoryForm({
                   <FormLabel>Billboard</FormLabel>
                   <FormControl>
                     <Select
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -195,8 +205,16 @@ export function CategoryForm({
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading || isDeleting}>
-              {action} {loading && <Spinner />}
+            <Button type="submit" disabled={isPending}>
+              {action} {isPending && <Spinner />}
+            </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              Cancel
             </Button>
           </div>
         </form>

@@ -1,6 +1,6 @@
 import { BillboardForm } from "./_components/billboard-form";
 
-import { getBillboard } from "@/data/billboard";
+import { getBillboardById } from "@/data/billboard";
 
 export default async function BillboardsPage({
   params,
@@ -8,7 +8,7 @@ export default async function BillboardsPage({
   params: Promise<{ billboardId: string }>;
 }) {
   const billboardId = (await params).billboardId;
-  const billboard = await getBillboard(billboardId);
+  const billboard = await getBillboardById(billboardId);
 
   return <BillboardForm initialData={billboard} />;
 }

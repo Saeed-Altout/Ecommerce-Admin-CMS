@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { EditIcon, MoreHorizontal, CopyIcon, TrashIcon } from "lucide-react";
 
 import { BillboardColumn } from "./columns";
+import { useDeleteBillboard } from "@/services/billboard/mutation";
 import { onCopy } from "@/helpers/on-copy";
 
 import {
@@ -17,7 +18,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { useDeleteBillboard } from "@/services/billboard/mutation";
 
 export function CellAction({ data }: { data: BillboardColumn }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -25,10 +25,10 @@ export function CellAction({ data }: { data: BillboardColumn }) {
   const router = useRouter();
   const params = useParams<{ storeId: string }>();
 
-  const { mutate, isPending: isDeleting } = useDeleteBillboard();
+  const { mutate: remove, isPending: isDeleting } = useDeleteBillboard();
 
   async function onConfirm() {
-    mutate(
+    remove(
       {
         storeId: params.storeId,
         billboardId: data.id,
@@ -52,7 +52,7 @@ export function CellAction({ data }: { data: BillboardColumn }) {
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon-sm">
+          <Button variant="ghost" size="icon-sm" disabled={isDeleting}>
             <span className="sr-only">Open menu</span>
             <MoreHorizontal />
           </Button>
@@ -60,6 +60,7 @@ export function CellAction({ data }: { data: BillboardColumn }) {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
+            disabled={isDeleting}
             onClick={() =>
               router.push(`/dashboard/${params.storeId}/billboards/${data.id}`)
             }
@@ -68,6 +69,7 @@ export function CellAction({ data }: { data: BillboardColumn }) {
             <span>Edit</span>
           </DropdownMenuItem>
           <DropdownMenuItem
+            disabled={isDeleting}
             onClick={() =>
               onCopy(
                 data.id,
@@ -80,6 +82,7 @@ export function CellAction({ data }: { data: BillboardColumn }) {
             <span>Copy ID</span>
           </DropdownMenuItem>
           <DropdownMenuItem
+            disabled={isDeleting}
             onClick={() => setIsOpen(true)}
             variant="destructive"
           >

@@ -9,7 +9,26 @@ export async function getCategories() {
   }
 }
 
-export async function getCategory(categoryId: string) {
+export async function getCategoriesByStoreId(storeId: string) {
+  try {
+    const categories = await db.category.findMany({
+      where: {
+        storeId,
+      },
+      include: {
+        billboard: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return categories;
+  } catch {
+    return [];
+  }
+}
+
+export async function getCategoryById(categoryId: string) {
   try {
     const category = await db.category.findUnique({
       where: { id: categoryId },

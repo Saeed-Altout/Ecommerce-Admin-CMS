@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 
-export const getBillboard = async (id: string) => {
+export const getBillboardById = async (id: string) => {
   try {
     const billboard = await db.billboard.findUnique({
       where: { id },
@@ -11,7 +11,7 @@ export const getBillboard = async (id: string) => {
   }
 };
 
-export const getBillboards = async (storeId: string) => {
+export const getBillboardsByStoreId = async (storeId: string) => {
   try {
     const billboards = await db.billboard.findMany({
       where: { storeId },

@@ -15,14 +15,10 @@ export const columns: ColumnDef<CategoryColumn>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => <span className="capitalize">{row.original.name}</span>,
   },
   {
     accessorKey: "billboardLabel",
     header: "Billboard",
-    cell: ({ row }) => (
-      <span className="capitalize">{row.original.billboardLabel}</span>
-    ),
   },
   {
     accessorKey: "createdAt",

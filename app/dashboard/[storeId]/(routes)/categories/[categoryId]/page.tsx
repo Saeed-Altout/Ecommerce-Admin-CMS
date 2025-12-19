@@ -1,9 +1,7 @@
-import { currentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-
-import { db } from "@/lib/db";
-
 import { CategoryForm } from "./_components/category-form";
+
+import { getCategoryById } from "@/data/category";
+import { getBillboardsByStoreId } from "@/data/billboard";
 
 export default async function CategoryPage({
   params,
@@ -12,26 +10,9 @@ export default async function CategoryPage({
 }) {
   const categoryId = (await params).categoryId;
   const storeId = (await params).storeId;
-  const user = await currentUser();
 
-  if (!user?.id) {
-    redirect("/sign-in");
-  }
-
-  const category = await db.category.findUnique({
-    where: {
-      id: categoryId,
-    },
-  });
-
-  const billboards = await db.billboard.findMany({
-    where: {
-      storeId,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  const category = await getCategoryById(categoryId);
+  const billboards = await getBillboardsByStoreId(storeId);
 
   return <CategoryForm initialData={category} billboards={billboards} />;
 }

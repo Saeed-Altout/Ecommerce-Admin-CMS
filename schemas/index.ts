@@ -50,3 +50,12 @@ export const billboardSchema = z.object({
     message: "Image URL must be a valid URL.",
   }),
 });
+
+export const categorySchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  billboardId: z.string().min(1, {
+    message: "Billboard is required.",
+  }),
+});
