@@ -58,7 +58,9 @@ export function CellAction({ data }: { data: SizeColumn }) {
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
           <DropdownMenuItem
             disabled={isDeleting}
-            onClick={() => router.push(`/${params.storeId}/sizes/${data.id}`)}
+            onClick={() =>
+              router.push(`/dashboard/${params.storeId}/sizes/${data.id}`)
+            }
           >
             <EditIcon />
             <span>Edit</span>
