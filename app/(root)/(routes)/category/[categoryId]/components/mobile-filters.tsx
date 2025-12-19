@@ -1,18 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Color, Size } from "@/lib/prisma/client";
-import { Button } from "@/components/ui/button";
 import { Plus, X } from "lucide-react";
-import { Dialog } from "@headlessui/react";
-import Filter from "./filter";
 
-interface MobileFiltersProps {
+import { Dialog } from "@headlessui/react";
+import { Color, Size } from "@/lib/prisma/client";
+
+import { Button } from "@/components/ui/button";
+import { Filter } from "./filter";
+
+export function MobileFilters({
+  sizes,
+  colors,
+}: {
   sizes: Size[];
   colors: Color[];
-}
-
-const MobileFilters: React.FC<MobileFiltersProps> = ({ sizes, colors }) => {
+}) {
   const [open, setOpen] = useState(true);
   const onOpen = () => setOpen(true);
   const onClose = () => setOpen(false);
@@ -50,6 +53,4 @@ const MobileFilters: React.FC<MobileFiltersProps> = ({ sizes, colors }) => {
       </Dialog>
     </>
   );
-};
-
-export default MobileFilters;
+}

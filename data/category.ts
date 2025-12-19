@@ -8,3 +8,15 @@ export async function getCategories() {
     return [];
   }
 }
+
+export async function getCategory(categoryId: string) {
+  try {
+    const category = await db.category.findUnique({
+      where: { id: categoryId },
+      include: { billboard: true },
+    });
+    return category;
+  } catch {
+    return null;
+  }
+}

@@ -25,13 +25,17 @@ export async function getProduct(productId: string) {
 
 export async function getSuggestProducts({
   categoryId,
+  colorId,
+  sizeId,
 }: {
   categoryId?: string;
+  colorId?: string;
+  sizeId?: string;
 }) {
   try {
     const products = await db.product.findMany({
       include: { images: true, size: true, category: true, color: true },
-      where: { categoryId },
+      where: { categoryId, colorId, sizeId },
     });
     return products;
   } catch {
