@@ -1,8 +1,8 @@
 import { getProducts } from "@/data/product";
 import { getBillboard } from "@/data/billboard";
 
-import { Billboard } from "../_components/billboard";
-import { ProductList } from "../_components/product-list";
+import { Billboard } from "@/components/store/billboard";
+import { ProductList } from "@/components/store/product-list";
 
 export default async function HomePage() {
   const billboard = await getBillboard(process.env.NEXT_PUBLIC_BILLBOARD_ID!);

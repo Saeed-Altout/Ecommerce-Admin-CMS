@@ -10,3 +10,31 @@ export async function getProducts() {
     return [];
   }
 }
+
+export async function getProduct(productId: string) {
+  try {
+    const product = await db.product.findUnique({
+      where: { id: productId },
+      include: { images: true, size: true, category: true, color: true },
+    });
+    return product;
+  } catch {
+    return null;
+  }
+}
+
+export async function getSuggestProducts({
+  categoryId,
+}: {
+  categoryId?: string;
+}) {
+  try {
+    const products = await db.product.findMany({
+      include: { images: true, size: true, category: true, color: true },
+      where: { categoryId },
+    });
+    return products;
+  } catch {
+    return [];
+  }
+}

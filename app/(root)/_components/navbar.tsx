@@ -1,7 +1,7 @@
 import Link from "next/link";
 
-import { MainNav } from "./main-nav";
-import { NavbarActions } from "./navbar-actions";
+import { MainNav } from "../../../components/store/main-nav";
+import { NavbarActions } from "../../../components/store/navbar-actions";
 
 import { getCategories } from "@/data/category";
 import { Container } from "@/components/ui/container";
