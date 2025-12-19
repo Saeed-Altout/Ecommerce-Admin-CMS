@@ -59,3 +59,10 @@ export const categorySchema = z.object({
     message: "Billboard is required.",
   }),
 });
+
+export const colorSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+  value: z.string().regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
+});

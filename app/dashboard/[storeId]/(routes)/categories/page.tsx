@@ -3,6 +3,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { PlusIcon } from "lucide-react";
 
+import { getCategoriesByStoreId } from "@/data/category";
 import { CategoryColumn, columns } from "./_components/columns";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { ApiList } from "@/components/ui/api-list";
-import { getCategoriesByStoreId } from "@/data/category";
 
 export default async function CategoriesPage({
   params,
@@ -24,7 +24,7 @@ export default async function CategoriesPage({
     id: category.id,
     name: category.name,
     billboardLabel: category.billboard.label,
-    createdAt: format(category.createdAt, "PPP"),
+    createdAt: format(category.createdAt, "PP"),
   }));
 
   return (

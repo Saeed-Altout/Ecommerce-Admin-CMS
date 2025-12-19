@@ -1,8 +1,15 @@
 import { db } from "@/lib/db";
 
-export async function getColors() {
+export async function getColorsByStoreId(storeId: string) {
   try {
-    const colors = await db.color.findMany();
+    const colors = db.color.findMany({
+      where: {
+        storeId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
     return colors;
   } catch {
     return [];

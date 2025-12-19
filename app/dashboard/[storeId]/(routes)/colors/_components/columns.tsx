@@ -3,6 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 
 import { CellAction } from "./cell-action";
+import { ColorItem } from "@/components/ui/color-item";
 
 export interface ColorColumn {
   id: string;
@@ -15,20 +16,11 @@ export const columns: ColumnDef<ColorColumn>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => <span className="capitalize">{row.original.name}</span>,
   },
   {
     accessorKey: "value",
     header: "Value",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-x-2">
-        <span
-          className="block size-6 rounded-full border"
-          style={{ backgroundColor: row.original.value }}
-        />
-        {row.original.value}
-      </div>
-    ),
+    cell: ({ row }) => <ColorItem color={row.original.value} />,
   },
   {
     accessorKey: "createdAt",
@@ -36,6 +28,7 @@ export const columns: ColumnDef<ColorColumn>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];
