@@ -3,6 +3,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { PlusIcon } from "lucide-react";
 
+import { getBillboardsByStoreId } from "@/data/billboard";
 import { BillboardColumn, columns } from "./_components/columns";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,6 @@ import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
 import { DataTable } from "@/components/ui/data-table";
 import { ApiList } from "@/components/ui/api-list";
-import { getBillboardsByStoreId } from "@/data/billboard";
 
 export default async function BillboardsPage({
   params,

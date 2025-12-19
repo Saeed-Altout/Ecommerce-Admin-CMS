@@ -15,7 +15,6 @@ export const columns: ColumnDef<SizeColumn>[] = [
   {
     accessorKey: "name",
     header: "Name",
-    cell: ({ row }) => <span className="capitalize">{row.original.name}</span>,
   },
   {
     accessorKey: "value",
@@ -27,6 +26,7 @@ export const columns: ColumnDef<SizeColumn>[] = [
   },
   {
     id: "actions",
+    header: "Actions",
     cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

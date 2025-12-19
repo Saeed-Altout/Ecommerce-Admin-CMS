@@ -8,8 +8,23 @@ export async function getSizes() {
     return [];
   }
 }
+export async function getSizesByStoreId(storeId: string) {
+  try {
+    const sizes = await db.size.findMany({
+      where: {
+        storeId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+    return sizes;
+  } catch {
+    return [];
+  }
+}
 
-export async function getSize(sizeId: string) {
+export async function getSizeById(sizeId: string) {
   try {
     const size = await db.size.findUnique({
       where: { id: sizeId },

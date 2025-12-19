@@ -1,15 +1,21 @@
 "use client";
-import { TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
+
+import { TrashIcon } from "lucide-react";
 import { toast } from "sonner";
-import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Size } from "@/lib/generated/prisma/client";
+import {
+  useCreateSize,
+  useDeleteSize,
+  useUpdateSize,
+} from "@/services/size/mutation";
+import { Size } from "@/lib/prisma/client";
+import { sizeSchema } from "@/schemas";
 
 import {
   Form,
@@ -26,22 +32,17 @@ import { Spinner } from "@/components/ui/spinner";
 import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-  value: z.string().min(2, {
-    message: "Value must be at least 2 characters.",
-  }),
-});
-
 export function SizeForm({ initialData }: { initialData: Size | null }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const router = useRouter();
+  const params = useParams<{ sizeId: string; storeId: string }>();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const router = useRouter();
-  const params = useParams();
+  const { mutate: remove, isPending: isDeleting } = useDeleteSize();
+  const { mutate: create, isPending: isCreating } = useCreateSize();
+  const { mutate: update, isPending: isUpdating } = useUpdateSize();
+
+  const isPending = isCreating || isUpdating;
 
   const title = initialData ? "Edit size" : "Create size";
   const description = initialData ? "Edit size" : "Add a new size";
@@ -50,50 +51,60 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
     : "Size created successfully";
   const action = initialData ? "Save changes" : "Create";
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof sizeSchema>>({
+    resolver: zodResolver(sizeSchema),
     defaultValues: initialData ?? {
       name: "",
       value: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setLoading(true);
+  const onSuccess = () => {
+    toast.success(toastMessage);
+    router.push(`/dashboard/${params.storeId}/sizes`);
+    router.refresh();
+  };
 
-      if (initialData) {
-        await axios.patch(
-          `/api/${params.storeId}/sizes/${params.sizeId}`,
-          values,
-        );
-      } else {
-        await axios.post(`/api/${params.storeId}/sizes`, values);
-      }
-
-      toast.success(toastMessage);
-      router.push(`/${params.storeId}/sizes`);
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setLoading(false);
+  async function onSubmit(values: z.infer<typeof sizeSchema>) {
+    if (initialData) {
+      update(
+        {
+          ...values,
+          storeId: params.storeId,
+          sizeId: params.sizeId,
+        },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
+    } else {
+      create(
+        { ...values, storeId: params.storeId },
+        {
+          onSuccess: () => {
+            onSuccess();
+          },
+        },
+      );
     }
   }
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(`/api/${params.storeId}/sizes/${params.sizeId}`);
-      toast.success("Size deleted successfully");
-      setIsOpen(false);
-      router.push(`/${params.storeId}/sizes`);
-      router.refresh();
-    } catch {
-      toast.error("Make sure you removed all categories using this size");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      {
+        storeId: params.storeId,
+        sizeId: params.sizeId,
+      },
+      {
+        onSuccess: () => {
+          setIsOpen(false);
+          router.push(`/dashboard/${params.storeId}/sizes`);
+          router.refresh();
+        },
+      },
+    );
   }
 
   return (
@@ -111,6 +122,7 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
           <Button
             variant="destructive"
             size="icon"
+            disabled={isPending}
             onClick={() => setIsOpen(true)}
           >
             <TrashIcon />
@@ -130,7 +142,7 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
                   <FormControl>
                     <Input
                       placeholder="Size name"
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -147,7 +159,7 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
                   <FormControl>
                     <Input
                       placeholder="Size value"
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -157,8 +169,16 @@ export function SizeForm({ initialData }: { initialData: Size | null }) {
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading || isDeleting}>
-              {action} {loading && <Spinner />}
+            <Button type="submit" disabled={isPending}>
+              {action} {isPending && <Spinner />}
+            </Button>
+            <Button
+              type="button"
+              disabled={isPending}
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              Cancel
             </Button>
           </div>
         </form>

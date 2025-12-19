@@ -1,8 +1,4 @@
-import { currentUser } from "@/lib/auth";
-import { redirect } from "next/navigation";
-
-import { db } from "@/lib/db";
-
+import { getSizeById } from "@/data/size";
 import { SizeForm } from "./_components/size-form";
 
 export default async function sizesPage({
@@ -11,17 +7,7 @@ export default async function sizesPage({
   params: Promise<{ sizeId: string }>;
 }) {
   const sizeId = (await params).sizeId;
-  const user = await currentUser();
-
-  if (!user?.id) {
-    redirect("/sign-in");
-  }
-
-  const size = await db.size.findUnique({
-    where: {
-      id: sizeId,
-    },
-  });
+  const size = await getSizeById(sizeId);
 
   return <SizeForm initialData={size} />;
 }
