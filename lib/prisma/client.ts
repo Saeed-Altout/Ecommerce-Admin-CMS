@@ -90,25 +90,10 @@ export type Billboard = Prisma.BillboardModel
  */
 export type Category = Prisma.CategoryModel
 /**
- * Model Size
- * 
- */
-export type Size = Prisma.SizeModel
-/**
- * Model Color
- * 
- */
-export type Color = Prisma.ColorModel
-/**
  * Model Product
  * 
  */
 export type Product = Prisma.ProductModel
-/**
- * Model Image
- * 
- */
-export type Image = Prisma.ImageModel
 /**
  * Model Order
  * 
@@ -119,3 +104,18 @@ export type Order = Prisma.OrderModel
  * 
  */
 export type OrderItem = Prisma.OrderItemModel
+/**
+ * Model Size
+ * 
+ */
+export type Size = Prisma.SizeModel
+/**
+ * Model Color
+ * 
+ */
+export type Color = Prisma.ColorModel
+/**
+ * Model Image
+ * 
+ */
+export type Image = Prisma.ImageModel

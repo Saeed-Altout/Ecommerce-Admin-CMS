@@ -1,21 +1,22 @@
 "use client";
 
-import axios from "axios";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 
 import { useCart } from "@/hooks/use-cart";
+import { useCheckout } from "@/services/checkout/mutation";
 
 import { Button } from "@/components/ui/button";
 import { Currency } from "@/components/ui/currency";
+import { Spinner } from "@/components/ui/spinner";
 
 export function Summary() {
   const searchParams = useSearchParams();
+  const { mutate: checkout, isPending } = useCheckout();
 
   const items = useCart((state) => state.items);
   const removeAll = useCart((state) => state.removeAll);
-
   const totalPrice = items.reduce(
     (total, item) => total + Number(item.price),
     0,
@@ -31,15 +32,8 @@ export function Summary() {
     }
   }, [searchParams, removeAll]);
 
-  const onCheckout = async () => {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/checkout`,
-      {
-        productIds: items.map((item) => item.id),
-      },
-    );
-
-    window.location = response.data.url;
+  const onCheckout = () => {
+    checkout(items.map((item) => item.id));
   };
 
   return (
@@ -54,11 +48,11 @@ export function Summary() {
         </div>
       </div>
       <Button
-        disabled={items.length === 0}
+        disabled={items.length === 0 || isPending}
         className="mt-6 w-full"
         onClick={onCheckout}
       >
-        Checkout
+        Checkout {isPending && <Spinner />}
       </Button>
     </div>
   );

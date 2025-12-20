@@ -48,7 +48,7 @@ export function StoreModal() {
 
       const response = await axios.post("/api/stores", values);
       toast.success("Store created successfully");
-      window.location.href = `/${response.data.id}`;
+      window.location.href = `/dashboard/${response.data.id}`;
     } catch {
       toast.error("Something went wrong!!");
     } finally {

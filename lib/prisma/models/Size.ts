@@ -319,6 +319,11 @@ export type SizeOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type SizeScalarRelationFilter = {
+  is?: Prisma.SizeWhereInput
+  isNot?: Prisma.SizeWhereInput
+}
+
 export type SizeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
@@ -344,11 +349,6 @@ export type SizeMinOrderByAggregateInput = {
   value?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type SizeScalarRelationFilter = {
-  is?: Prisma.SizeWhereInput
-  isNot?: Prisma.SizeWhereInput
 }
 
 export type SizeCreateNestedManyWithoutStoreInput = {

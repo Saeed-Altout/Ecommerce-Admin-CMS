@@ -319,6 +319,11 @@ export type ColorOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type ColorScalarRelationFilter = {
+  is?: Prisma.ColorWhereInput
+  isNot?: Prisma.ColorWhereInput
+}
+
 export type ColorCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
@@ -344,11 +349,6 @@ export type ColorMinOrderByAggregateInput = {
   value?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type ColorScalarRelationFilter = {
-  is?: Prisma.ColorWhereInput
-  isNot?: Prisma.ColorWhereInput
 }
 
 export type ColorCreateNestedManyWithoutStoreInput = {

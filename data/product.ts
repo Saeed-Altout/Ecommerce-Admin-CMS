@@ -3,9 +3,21 @@ import { db } from "@/lib/db";
 export async function getProducts() {
   try {
     const products = await db.product.findMany({
-      include: { images: true, size: true, category: true, color: true },
+      include: {
+        images: true,
+        size: true,
+        category: true,
+        color: true,
+      },
+      orderBy: { createdAt: "desc" },
     });
-    return products;
+
+    return products.map((product) => ({
+      ...product,
+      price: product.price.toString(),
+      createdAt: product.createdAt.toISOString(),
+      updatedAt: product.updatedAt.toISOString(),
+    }));
   } catch {
     return [];
   }
@@ -56,7 +68,7 @@ export async function getSuggestProducts({
   try {
     const products = await db.product.findMany({
       include: { images: true, size: true, category: true, color: true },
-      where: { categoryId, colorId, sizeId },
+      where: { categoryId, colorId, sizeId, isArchived: false },
     });
     return products;
   } catch {
