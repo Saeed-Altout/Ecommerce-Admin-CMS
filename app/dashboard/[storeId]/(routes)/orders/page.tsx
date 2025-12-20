@@ -15,6 +15,8 @@ export default async function OrdersPage({
   const storeId = (await params).storeId;
   const orders = await getOrdersByStoreId(storeId);
 
+  console.log(orders);
+
   const formattedOrders: OrderColumn[] = orders.map((order) => ({
     id: order.id,
     phone: order.phone,

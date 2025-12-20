@@ -13,11 +13,17 @@ export default proxy((req) => {
   const isLoggedIn = !!req.auth;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
+  const isWebhookRoute = nextUrl.pathname === "/api/webhook";
   const isPublicRoute = publicRoutes.some(
     (route) =>
       nextUrl.pathname === route || nextUrl.pathname.startsWith(`${route}/`),
   );
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+
+  // Allow webhook route without authentication
+  if (isWebhookRoute) {
+    return NextResponse.next();
+  }
 
   if (isApiAuthRoute) {
     return NextResponse.next();

@@ -8,7 +8,6 @@ export const useCheckout = () => {
     mutationKey: ["checkout"],
     mutationFn: checkout,
     onSuccess: (data) => {
-      toast.success("Checkout successful");
       window.location.href = data.url;
     },
     onError: () => {

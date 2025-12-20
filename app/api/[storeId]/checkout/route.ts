@@ -51,13 +51,12 @@ export async function POST(
       isPaid: false,
       orderItems: {
         create: productIds.map((productId: string) => ({
-          product: {
-            connect: {
-              id: productId,
-            },
-          },
+          productId: productId,
         })),
       },
+    },
+    include: {
+      orderItems: true,
     },
   });
 
