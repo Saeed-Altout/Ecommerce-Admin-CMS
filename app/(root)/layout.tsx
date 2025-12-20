@@ -11,8 +11,8 @@ const urbanist = Urbanist({
 });
 
 export const metadata: Metadata = {
-  title: "Store",
-  description: "E-Commerce Store",
+  title: "Vendo Store",
+  description: "Vendo E-commerce Store",
 };
 
 export default function RootLayout({
