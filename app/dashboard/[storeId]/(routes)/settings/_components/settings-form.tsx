@@ -121,12 +121,20 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
             <Button type="submit" disabled={loading || isDeleting}>
               Save changes {loading && <Spinner />}
             </Button>
+            <Button
+              type="button"
+              disabled={loading}
+              variant="outline"
+              onClick={() => router.back()}
+            >
+              Cancel
+            </Button>
           </div>
         </form>
       </Form>
       <ApiAlert
         title="NEXT_PUBLIC_API_URL"
-        description={`${origin}/api/stores/${params.storeId}`}
+        description={`${origin}/api/${params.storeId}`}
         variant="public"
       />
     </>
