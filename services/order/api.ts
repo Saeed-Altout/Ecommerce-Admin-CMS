@@ -1,14 +1,15 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { DeleteOrderRequest } from "./type";
 import { orderSchema } from "@/schemas";
 
-export const deleteOrder = async (req: DeleteOrderRequest) => {
+export const deleteOrder = async (req: {
+  storeId: string;
+  orderId: string;
+}) => {
   try {
-    const response = await axios.delete(
-      `/api/${req.storeId}/orders/${req.orderId}`,
-    );
+    const { storeId, orderId } = req;
+    const response = await axios.delete(`/api/${storeId}/orders/${orderId}`);
     return response.data;
   } catch (error) {
     throw error;

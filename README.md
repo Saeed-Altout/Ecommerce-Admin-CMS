@@ -21,6 +21,7 @@ A comprehensive, multi-store E-commerce Admin Dashboard and Storefront built wit
 ## ✨ Key Features
 
 ### Admin Dashboard
+
 - **Multi-Store Architecture:** Create and manage multiple distinct stores from a single dashboard account
 - **Product Management:** Full CRUD capabilities for products with:
   - Price management
@@ -35,6 +36,7 @@ A comprehensive, multi-store E-commerce Admin Dashboard and Storefront built wit
 - **Analytics Dashboard:** Overview of store performance and metrics
 
 ### Storefront (Public)
+
 - **Product Catalog:** Browse products by category
 - **Product Details:** View detailed product information with image galleries
 - **Shopping Cart:** Add products to cart with persistent storage
@@ -42,6 +44,7 @@ A comprehensive, multi-store E-commerce Admin Dashboard and Storefront built wit
 - **Order Tracking:** View order status after payment
 
 ### Authentication & Security
+
 - **NextAuth.js Integration:** Secure authentication with multiple providers
 - **Two-Factor Authentication:** Enhanced security with 2FA support
 - **Role-Based Access Control:** Admin and User roles
@@ -50,6 +53,7 @@ A comprehensive, multi-store E-commerce Admin Dashboard and Storefront built wit
 - **OAuth Providers:** Support for Google and GitHub authentication
 
 ### Payment Processing
+
 - **Stripe Integration:** Secure payment processing
 - **Webhook Handling:** Automatic order updates after payment
 - **Order Management:** Automatic order status updates and product archiving
@@ -95,7 +99,7 @@ STRIPE_WEBHOOK_SECRET="whsec_..." # Get from Stripe Dashboard → Webhooks
 
 # Application
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
-NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
 ```
 
 ## 📦 Installation
@@ -195,6 +199,7 @@ vendo/
 ## 🔌 API Endpoints
 
 ### Store Management
+
 - `GET /api/stores` - List all stores
 - `POST /api/stores` - Create a new store
 - `GET /api/stores/[storeId]` - Get store details
@@ -202,6 +207,7 @@ vendo/
 - `DELETE /api/stores/[storeId]` - Delete store
 
 ### Products
+
 - `GET /api/[storeId]/products` - List products
 - `POST /api/[storeId]/products` - Create product
 - `GET /api/[storeId]/products/[productId]` - Get product details
@@ -209,6 +215,7 @@ vendo/
 - `DELETE /api/[storeId]/products/[productId]` - Delete product
 
 ### Categories
+
 - `GET /api/[storeId]/categories` - List categories
 - `POST /api/[storeId]/categories` - Create category
 - `GET /api/[storeId]/categories/[categoryId]` - Get category details
@@ -216,6 +223,7 @@ vendo/
 - `DELETE /api/[storeId]/categories/[categoryId]` - Delete category
 
 ### Billboards
+
 - `GET /api/[storeId]/billboards` - List billboards
 - `POST /api/[storeId]/billboards` - Create billboard
 - `GET /api/[storeId]/billboards/[billboardId]` - Get billboard details
@@ -223,6 +231,7 @@ vendo/
 - `DELETE /api/[storeId]/billboards/[billboardId]` - Delete billboard
 
 ### Checkout & Payments
+
 - `POST /api/[storeId]/checkout` - Create Stripe checkout session
 - `POST /api/webhook` - Stripe webhook handler (updates orders after payment)
 
@@ -231,20 +240,23 @@ vendo/
 ### Local Development
 
 1. Install Stripe CLI:
+
    ```bash
    # macOS
    brew install stripe/stripe-cli/stripe
-   
+
    # Windows (via Scoop)
    scoop install stripe
    ```
 
 2. Login to Stripe:
+
    ```bash
    stripe login
    ```
 
 3. Forward webhooks to local server:
+
    ```bash
    stripe listen --forward-to localhost:3000/api/webhook
    ```
@@ -306,6 +318,7 @@ See `prisma/schema.prisma` for complete schema definition.
 ### Other Platforms
 
 The application can be deployed to any platform supporting Next.js:
+
 - Railway
 - Render
 - AWS Amplify

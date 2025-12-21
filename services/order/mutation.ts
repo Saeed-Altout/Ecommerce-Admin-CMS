@@ -11,7 +11,7 @@ export const useDeleteOrder = () => {
       toast.success("Order deleted successfully");
     },
     onError: () => {
-      toast.error("Make sure you removed all categories using this order");
+      toast.error("Unable to delete order. Please try again.");
     },
   });
 };
@@ -24,7 +24,7 @@ export const useCreateOrder = () => {
       toast.success("Order created successfully");
     },
     onError: () => {
-      toast.error("Failed create order!");
+      toast.error("Failed to create order. Please try again.");
     },
   });
 };
@@ -37,7 +37,7 @@ export const useUpdateOrder = () => {
       toast.success("Order updated successfully");
     },
     onError: () => {
-      toast.error("Failed update order!");
+      toast.error("Failed to update order. Please try again.");
     },
   });
 };

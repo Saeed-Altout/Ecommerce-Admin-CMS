@@ -11,7 +11,9 @@ export const useDeleteProduct = () => {
       toast.success("Product deleted successfully");
     },
     onError: () => {
-      toast.error("Make sure you removed all categories using this product");
+      toast.error(
+        "Unable to delete product. Please remove it from all active orders first.",
+      );
     },
   });
 };
@@ -24,7 +26,7 @@ export const useCreateProduct = () => {
       toast.success("Product created successfully");
     },
     onError: () => {
-      toast.error("Failed create product!");
+      toast.error("Failed to create product. Please try again.");
     },
   });
 };
@@ -37,7 +39,7 @@ export const useUpdateProduct = () => {
       toast.success("Product updated successfully");
     },
     onError: () => {
-      toast.error("Failed update product!");
+      toast.error("Failed to update product. Please try again.");
     },
   });
 };

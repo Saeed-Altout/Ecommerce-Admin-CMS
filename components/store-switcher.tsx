@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Check, ChevronsUpDown, PlusIcon, StoreIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { Store } from "@/lib/generated/prisma/client";
+import { Store } from "@/lib/prisma/client";
 import { useStoreModal } from "@/hooks/use-store-modal";
 
 import {
@@ -49,7 +49,7 @@ export function StoreSwitcher({ stores, className }: StoreSwitcherProps) {
 
   const onStoreSelect = (store: { value: string; label: string }) => {
     setOpen(false);
-    router.push(`/${store.value}`);
+    router.push(`/dashboard/${store.value}`);
     router.refresh();
   };
 

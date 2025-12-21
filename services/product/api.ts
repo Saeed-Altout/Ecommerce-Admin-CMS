@@ -1,13 +1,16 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { DeleteProductRequest } from "./type";
 import { productSchema } from "@/schemas";
 
-export const deleteProduct = async (req: DeleteProductRequest) => {
+export const deleteProduct = async (req: {
+  storeId: string;
+  productId: string;
+}) => {
   try {
+    const { storeId, productId } = req;
     const response = await axios.delete(
-      `/api/${req.storeId}/products/${req.productId}`,
+      `/api/${storeId}/products/${productId}`,
     );
     return response.data;
   } catch (error) {

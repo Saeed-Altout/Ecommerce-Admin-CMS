@@ -1,13 +1,16 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { DeleteBillboardRequest } from "./type";
 import { billboardSchema } from "@/schemas";
 
-export const deleteBillboard = async (req: DeleteBillboardRequest) => {
+export const deleteBillboard = async (req: {
+  storeId: string;
+  billboardId: string;
+}) => {
   try {
+    const { storeId, billboardId } = req;
     const response = await axios.delete(
-      `/api/${req.storeId}/billboards/${req.billboardId}`,
+      `/api/${storeId}/billboards/${billboardId}`,
     );
     return response.data;
   } catch (error) {
@@ -19,8 +22,8 @@ export const createBillboard = async (
   req: z.infer<typeof billboardSchema> & { storeId: string },
 ) => {
   try {
-    const { storeId, ...billboard } = req;
-    const response = await axios.post(`/api/${storeId}/billboards`, billboard);
+    const { storeId, ...rest } = req;
+    const response = await axios.post(`/api/${storeId}/billboards`, rest);
     return response.data;
   } catch (error) {
     throw error;
@@ -34,10 +37,10 @@ export const updateBillboard = async (
   },
 ) => {
   try {
-    const { storeId, billboardId, ...billboard } = req;
+    const { storeId, billboardId, ...rest } = req;
     const response = await axios.patch(
       `/api/${storeId}/billboards/${billboardId}`,
-      billboard,
+      rest,
     );
     return response.data;
   } catch (error) {

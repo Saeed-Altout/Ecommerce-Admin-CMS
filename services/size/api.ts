@@ -1,14 +1,15 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { DeleteSizeRequest } from "./type";
 import { sizeSchema } from "@/schemas";
 
-export const deleteSize = async (req: DeleteSizeRequest) => {
+export const deleteSize = async (req: {
+  storeId: string;
+  sizeId: string;
+}) => {
   try {
-    const response = await axios.delete(
-      `/api/${req.storeId}/sizes/${req.sizeId}`,
-    );
+    const { storeId, sizeId } = req;
+    const response = await axios.delete(`/api/${storeId}/sizes/${sizeId}`);
     return response.data;
   } catch (error) {
     throw error;

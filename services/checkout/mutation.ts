@@ -11,7 +11,7 @@ export const useCheckout = () => {
       window.location.href = data.url;
     },
     onError: () => {
-      toast.error("Failed checkout!");
+      toast.error("Failed to process checkout. Please try again.");
     },
   });
 };

@@ -11,7 +11,9 @@ export const useDeleteSize = () => {
       toast.success("Size deleted successfully");
     },
     onError: () => {
-      toast.error("Make sure you removed all categories using this size");
+      toast.error(
+        "Unable to delete size. Please remove it from all products first.",
+      );
     },
   });
 };
@@ -24,7 +26,7 @@ export const useCreateSize = () => {
       toast.success("Size created successfully");
     },
     onError: () => {
-      toast.error("Failed create size!");
+      toast.error("Failed to create size. Please try again.");
     },
   });
 };
@@ -37,7 +39,7 @@ export const useUpdateSize = () => {
       toast.success("Size updated successfully");
     },
     onError: () => {
-      toast.error("Failed update size!");
+      toast.error("Failed to update size. Please try again.");
     },
   });
 };

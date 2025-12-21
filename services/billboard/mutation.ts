@@ -11,7 +11,9 @@ export const useDeleteBillboard = () => {
       toast.success("Billboard deleted successfully");
     },
     onError: () => {
-      toast.error("Make sure you removed all categories using this billboard");
+      toast.error(
+        "Unable to delete billboard. Please remove all categories using this billboard first.",
+      );
     },
   });
 };
@@ -24,7 +26,7 @@ export const useCreateBillboard = () => {
       toast.success("Billboard created successfully");
     },
     onError: () => {
-      toast.error("Failed create billboard!");
+      toast.error("Failed to create billboard. Please try again.");
     },
   });
 };
@@ -37,7 +39,7 @@ export const useUpdateBillboard = () => {
       toast.success("Billboard updated successfully");
     },
     onError: () => {
-      toast.error("Failed update billboard!");
+      toast.error("Failed to update billboard. Please try again.");
     },
   });
 };

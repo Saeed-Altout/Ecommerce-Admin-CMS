@@ -1,13 +1,16 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { DeleteCategoryRequest } from "./type";
 import { categorySchema } from "@/schemas";
 
-export const deleteCategory = async (req: DeleteCategoryRequest) => {
+export const deleteCategory = async (req: {
+  storeId: string;
+  categoryId: string;
+}) => {
   try {
+    const { storeId, categoryId } = req;
     const response = await axios.delete(
-      `/api/${req.storeId}/categories/${req.categoryId}`,
+      `/api/${storeId}/categories/${categoryId}`,
     );
     return response.data;
   } catch (error) {

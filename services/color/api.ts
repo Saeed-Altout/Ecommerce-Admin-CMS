@@ -1,14 +1,15 @@
 import axios from "axios";
 import { z } from "zod";
 
-import { DeleteColorRequest } from "./type";
 import { colorSchema } from "@/schemas";
 
-export const deleteColor = async (req: DeleteColorRequest) => {
+export const deleteColor = async (req: {
+  storeId: string;
+  colorId: string;
+}) => {
   try {
-    const response = await axios.delete(
-      `/api/${req.storeId}/colors/${req.colorId}`,
-    );
+    const { storeId, colorId } = req;
+    const response = await axios.delete(`/api/${storeId}/colors/${colorId}`);
     return response.data;
   } catch (error) {
     throw error;

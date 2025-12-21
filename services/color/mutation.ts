@@ -11,7 +11,9 @@ export const useDeleteColor = () => {
       toast.success("Color deleted successfully");
     },
     onError: () => {
-      toast.error("Make sure you removed all categories using this color");
+      toast.error(
+        "Unable to delete color. Please remove it from all products first.",
+      );
     },
   });
 };
@@ -24,7 +26,7 @@ export const useCreateColor = () => {
       toast.success("Color created successfully");
     },
     onError: () => {
-      toast.error("Failed create color!");
+      toast.error("Failed to create color. Please try again.");
     },
   });
 };
@@ -37,7 +39,7 @@ export const useUpdateColor = () => {
       toast.success("Color updated successfully");
     },
     onError: () => {
-      toast.error("Failed update color!");
+      toast.error("Failed to update color. Please try again.");
     },
   });
 };

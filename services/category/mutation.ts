@@ -11,7 +11,9 @@ export const useDeleteCategory = () => {
       toast.success("Category deleted successfully");
     },
     onError: () => {
-      toast.error("Make sure you removed all categories using this category");
+      toast.error(
+        "Unable to delete category. Please remove all products from this category first.",
+      );
     },
   });
 };
@@ -24,7 +26,7 @@ export const useCreateCategory = () => {
       toast.success("Category created successfully");
     },
     onError: () => {
-      toast.error("Failed create category!");
+      toast.error("Failed to create category. Please try again.");
     },
   });
 };
@@ -37,7 +39,7 @@ export const useUpdateCategory = () => {
       toast.success("Category updated successfully");
     },
     onError: () => {
-      toast.error("Failed update billboard!");
+      toast.error("Failed to update category. Please try again.");
     },
   });
 };
