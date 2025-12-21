@@ -97,3 +97,9 @@ export const orderSchema = z.object({
     message: "Image URL must be a valid URL.",
   }),
 });
+
+export const storeSchema = z.object({
+  name: z.string().min(2, {
+    message: "Name must be at least 2 characters.",
+  }),
+});

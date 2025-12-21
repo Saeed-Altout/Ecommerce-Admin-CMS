@@ -1,6 +1,4 @@
-import { currentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-
 import { db } from "@/lib/db";
 
 import { SettingsForm } from "./_components/settings-form";
@@ -11,18 +9,7 @@ export default async function SettingsPage({
   params: Promise<{ storeId: string }>;
 }) {
   const storeId = (await params).storeId;
-  const user = await currentUser();
-
-  if (!user?.id) {
-    redirect("/sign-in");
-  }
-
-  const store = await db.store.findFirst({
-    where: {
-      id: storeId,
-      userId: user?.id,
-    },
-  });
+  const store = await db.store.findFirst({ where: { id: storeId } });
 
   if (!store) {
     redirect("/");

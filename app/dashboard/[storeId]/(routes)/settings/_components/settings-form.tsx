@@ -2,8 +2,6 @@
 import { TrashIcon } from "lucide-react";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
-import axios from "axios";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -11,6 +9,9 @@ import { z } from "zod";
 
 import { Store } from "@/lib/generated/prisma/client";
 import { useOrigin } from "@/hooks/use-origin";
+
+import { useDeleteStore, useUpdateStore } from "@/services/store/mutation";
+import { storeSchema } from "@/schemas";
 
 import {
   Form,
@@ -28,54 +29,44 @@ import { Separator } from "@/components/ui/separator";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { ApiAlert } from "@/components/ui/alert-api";
 
-const formSchema = z.object({
-  name: z.string().min(2, {
-    message: "Name must be at least 2 characters.",
-  }),
-});
-
 export function SettingsForm({ initialData }: { initialData: Store }) {
-  const [loading, setLoading] = useState<boolean>(false);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const router = useRouter();
-  const params = useParams();
+  const params = useParams<{ storeId: string }>();
   const origin = useOrigin();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const { mutate: remove, isPending: isDeleting } = useDeleteStore();
+  const { mutate: update, isPending } = useUpdateStore();
+
+  const form = useForm<z.infer<typeof storeSchema>>({
+    resolver: zodResolver(storeSchema),
     defaultValues: initialData ?? {
       name: "",
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setLoading(true);
-
-      await axios.patch(`/api/stores/${params.storeId}`, values);
-      toast.success("Store updated successfully");
-      router.refresh();
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setLoading(false);
-    }
+  async function onSubmit(values: z.infer<typeof storeSchema>) {
+    update(
+      { ...values, storeId: params.storeId },
+      {
+        onSuccess: () => {
+          router.refresh();
+        },
+      },
+    );
   }
 
   async function onConfirm() {
-    try {
-      setIsDeleting(true);
-      await axios.delete(`/api/stores/${params.storeId}`);
-      toast.success("Store deleted successfully");
-      router.refresh();
-      router.push("/");
-    } catch {
-      toast.error("Something went wrong!!");
-    } finally {
-      setIsDeleting(false);
-    }
+    remove(
+      { storeId: params.storeId },
+      {
+        onSuccess: () => {
+          router.refresh();
+          router.push("/");
+        },
+      },
+    );
   }
 
   return (
@@ -90,6 +81,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
         <Button
           variant="destructive"
           size="icon"
+          disabled={isDeleting | isPending}
           onClick={() => setIsOpen(true)}
         >
           <TrashIcon />
@@ -108,7 +100,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
                   <FormControl>
                     <Input
                       placeholder="store name"
-                      disabled={loading || isDeleting}
+                      disabled={isPending}
                       {...field}
                     />
                   </FormControl>
@@ -118,12 +110,12 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
             />
           </div>
           <div className="flex items-center gap-x-2">
-            <Button type="submit" disabled={loading || isDeleting}>
-              Save changes {loading && <Spinner />}
+            <Button type="submit" disabled={isPending}>
+              Save changes {isPending && <Spinner />}
             </Button>
             <Button
               type="button"
-              disabled={loading}
+              disabled={isPending}
               variant="outline"
               onClick={() => router.back()}
             >
