@@ -1,8 +1,8 @@
 "use client";
 import { useCart } from "@/hooks/use-cart";
 
-import { CartItem } from "./components/cart-item";
-import { Summary } from "./components/summary";
+import { CartItem } from "./_components/cart-item";
+import { Summary } from "./_components/summary";
 
 export default function CartPage() {
   const cart = useCart();

@@ -8,8 +8,8 @@ import { Billboard } from "@/components/store/billboard";
 import { NoResults } from "@/components/store/no-results";
 import { ProductCard } from "@/components/store/product-card";
 
-import { Filter } from "./components/filter";
-import { MobileFilters } from "./components/mobile-filters";
+import { Filter } from "./_components/filter";
+import { MobileFilters } from "./_components/mobile-filters";
 
 export default async function CategoryPage({
   params,
