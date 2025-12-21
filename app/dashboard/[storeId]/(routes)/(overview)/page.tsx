@@ -1,6 +1,11 @@
 import { BadgeIcon, DollarSignIcon, Wallet2Icon } from "lucide-react";
 
-import { getSalesCount, getStoreCount, getTotalRevenue } from "@/data/overview";
+import {
+  getGraphRevenue,
+  getSalesCount,
+  getStoreCount,
+  getTotalRevenue,
+} from "@/data/overview";
 
 import {
   Card,
@@ -21,6 +26,7 @@ export default async function OverviewPage({
   const totalRevenue = await getTotalRevenue(storeId);
   const salesCount = await getSalesCount(storeId);
   const storeCount = await getStoreCount(storeId);
+  const graphData = await getGraphRevenue(storeId);
 
   return (
     <>
@@ -30,7 +36,7 @@ export default async function OverviewPage({
           <CardHeader>
             <CardDescription>Total Revenue</CardDescription>
             <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-              {totalRevenue}$
+              ${totalRevenue.toFixed(2)}
             </CardTitle>
             <CardAction>
               <DollarSignIcon className="size-4" />
@@ -60,7 +66,7 @@ export default async function OverviewPage({
           </CardHeader>
         </Card>
       </div>
-      <ChartAreaInteractive />
+      <ChartAreaInteractive data={graphData} />
     </>
   );
 }

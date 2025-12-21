@@ -33,11 +33,15 @@ export async function getStoreCount(storeId: string) {
   return storeCount;
 }
 
-interface GraphData {
-  name: string;
-  total: number;
+export interface GraphData {
+  date: string;
+  revenue: number;
 }
 
+/**
+ * Get daily revenue data for the last 90 days
+ * Returns data in format: { date: "YYYY-MM-DD", revenue: number }
+ */
 export async function getGraphRevenue(storeId: string) {
   const paidOrders = await db.order.findMany({
     where: {
@@ -51,39 +55,53 @@ export async function getGraphRevenue(storeId: string) {
         },
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
-  const monthlyRevenue: { [key: number]: number } = {};
+  // Calculate date range (last 90 days)
+  const endDate = new Date();
+  endDate.setHours(23, 59, 59, 999);
+  const startDate = new Date(endDate);
+  startDate.setDate(startDate.getDate() - 90);
+  startDate.setHours(0, 0, 0, 0);
 
+  // Initialize daily revenue map with all dates in range
+  const dailyRevenue: Map<string, number> = new Map();
+  const currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    const dateKey = currentDate.toISOString().split("T")[0];
+    dailyRevenue.set(dateKey, 0);
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // Calculate revenue for each order
   for (const order of paidOrders) {
-    const month = order.createdAt.getMonth();
-    let revenueForOrder = 0;
+    const orderDate = new Date(order.createdAt);
+    const dateKey = orderDate.toISOString().split("T")[0];
 
-    for (const item of order.orderItems) {
-      revenueForOrder += Number(item.product.price);
+    // Only process orders within the date range
+    if (orderDate >= startDate && orderDate <= endDate) {
+      let revenueForOrder = 0;
+
+      for (const item of order.orderItems) {
+        revenueForOrder += Number(item.product.price);
+      }
+
+      const currentRevenue = dailyRevenue.get(dateKey) || 0;
+      dailyRevenue.set(dateKey, currentRevenue + revenueForOrder);
     }
-
-    monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;
   }
 
-  const graphData: GraphData[] = [
-    { name: "Jan", total: 0 },
-    { name: "Feb", total: 0 },
-    { name: "Mar", total: 0 },
-    { name: "Apr", total: 0 },
-    { name: "May", total: 0 },
-    { name: "Jun", total: 0 },
-    { name: "Jul", total: 0 },
-    { name: "Aug", total: 0 },
-    { name: "Sep", total: 0 },
-    { name: "Oct", total: 0 },
-    { name: "Nov", total: 0 },
-    { name: "Dec", total: 0 },
-  ];
-
-  for (const month in monthlyRevenue) {
-    graphData[parseInt(month)].total = monthlyRevenue[parseInt(month)];
-  }
+  // Convert map to array and sort by date
+  const graphData: GraphData[] = Array.from(dailyRevenue.entries())
+    .map(([date, revenue]) => ({
+      date,
+      revenue: Math.round(revenue * 100) / 100, // Round to 2 decimal places
+    }))
+    .sort((a, b) => a.date.localeCompare(b.date));
 
   return graphData;
 }
