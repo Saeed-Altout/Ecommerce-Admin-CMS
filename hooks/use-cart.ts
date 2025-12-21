@@ -1,12 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
-import { Product } from "@/types";
 import { toast } from "sonner";
+import { ProductType } from "@/components/store/product-list";
 
 interface CartStore {
-  items: Product[];
-  addItem: (data: Product) => void;
+  items: ProductType[];
+  addItem: (data: ProductType) => void;
   removeItem: (id: string) => void;
   removeAll: () => void;
 }
@@ -15,7 +15,7 @@ export const useCart = create(
   persist<CartStore>(
     (set, get) => ({
       items: [],
-      addItem: (data: Product) => {
+      addItem: (data: ProductType) => {
         const currentItems = get().items;
         const existingItem = currentItems.find((item) => item.id === data.id);
 
@@ -34,6 +34,6 @@ export const useCart = create(
     {
       name: "cart-storage",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
+    },
+  ),
 );

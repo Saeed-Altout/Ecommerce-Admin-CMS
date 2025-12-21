@@ -55,10 +55,10 @@ export async function POST(
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { storeId: string } },
+  { params }: { params: Promise<{ storeId: string }> },
 ) {
   try {
-    const { storeId } = params;
+    const { storeId } = await params;
 
     if (!storeId) {
       return new NextResponse("Store ID is required", { status: 400 });

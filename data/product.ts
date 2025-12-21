@@ -12,12 +12,7 @@ export async function getProducts() {
       orderBy: { createdAt: "desc" },
     });
 
-    return products.map((product) => ({
-      ...product,
-      price: product.price.toString(),
-      createdAt: product.createdAt.toISOString(),
-      updatedAt: product.updatedAt.toISOString(),
-    }));
+    return products;
   } catch {
     return [];
   }

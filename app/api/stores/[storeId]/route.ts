@@ -4,9 +4,10 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { storeId: string } },
+  { params }: { params: Promise<{ storeId: string }> },
 ) {
   try {
+    const { storeId } = await params;
     const { name } = await request.json();
     const user = await currentUser();
 
@@ -20,7 +21,7 @@ export async function PATCH(
 
     const store = await db.store.updateMany({
       where: {
-        id: params.storeId,
+        id: storeId,
         userId: user.id,
       },
       data: {
@@ -37,9 +38,10 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { storeId: string } },
+  { params }: { params: Promise<{ storeId: string }> },
 ) {
   try {
+    const { storeId } = await params;
     const user = await currentUser();
 
     if (!user?.id) {
@@ -48,7 +50,7 @@ export async function DELETE(
 
     const store = await db.store.deleteMany({
       where: {
-        id: params.storeId,
+        id: storeId,
         userId: user.id,
       },
     });

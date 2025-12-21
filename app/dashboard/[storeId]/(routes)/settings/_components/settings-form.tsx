@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { Store } from "@/lib/generated/prisma/client";
+import { Store } from "@/lib/prisma/client";
 import { useOrigin } from "@/hooks/use-origin";
 
 import { useDeleteStore, useUpdateStore } from "@/services/store/mutation";
@@ -81,7 +81,7 @@ export function SettingsForm({ initialData }: { initialData: Store }) {
         <Button
           variant="destructive"
           size="icon"
-          disabled={isDeleting | isPending}
+          disabled={isPending}
           onClick={() => setIsOpen(true)}
         >
           <TrashIcon />
